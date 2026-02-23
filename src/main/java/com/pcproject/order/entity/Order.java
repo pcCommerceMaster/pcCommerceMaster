@@ -71,8 +71,16 @@ public class Order {
         this.updatedAt = LocalDateTime.now();
     }
 
+    // 주문 상태 변경 메서드
     public void updateStatus(OrderStatus status) {
         this.status = status;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // 주문 취소 메서드
+    public void cancel(String cancelReason) {
+        this.status = OrderStatus.CANCELLED;
+        this.cancelReason = cancelReason;
         this.updatedAt = LocalDateTime.now();
     }
 }
