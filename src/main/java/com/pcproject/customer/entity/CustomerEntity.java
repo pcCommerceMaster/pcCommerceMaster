@@ -10,6 +10,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 @Getter
 @Entity
@@ -38,6 +39,10 @@ public class CustomerEntity {
     private LocalDateTime createdAt;
 
     private LocalDateTime deletedAt;
+
+    // orederEntity 임의 설정와 customerEntity 연결해야함. ********
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderEntity> orders = new ArrayList<>();
 
     // 비즈니스 메서드 (정보 수정)
     public void updateInfo(String name, String email, String phoneNumber) {
