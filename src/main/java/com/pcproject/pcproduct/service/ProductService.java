@@ -1,5 +1,7 @@
 package com.pcproject.pcproduct.service;
 
+import com.pc_commerce_master.global.exception.CustomException;
+import com.pc_commerce_master.global.exception.ErrorCode;
 import com.pcproject.admin.entity.Admin;
 import com.pcproject.admin.repository.AdminRepository;
 import com.pcproject.pcproduct.dto.ProductCreateRequest;
@@ -19,8 +21,7 @@ public class ProductService {
     @Transactional
     public ProductCreateResponse createProduct(ProductCreateRequest request, Long adminId) {
         Admin admin = adminRepository.findById(adminId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 관리자입니다.")
-        );
+                () -> new CustomException(ErrorCode.ADMIN_NOT_FOUND));
         Product product = new Product(
                 request.getProductName(),
                 request.getCategory(),
