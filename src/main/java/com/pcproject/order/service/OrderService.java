@@ -30,6 +30,9 @@ public class OrderService {
     @Transactional
     public CreateOrderResponse createOrder(CreateOrderRequest request) {
 
+        // 예외 처 - 고객 아이디
+
+
         // 주문번호(임시) ORD-생성시간-랜덤
         String orderNumber =
                 "ORD-" + System.currentTimeMillis()
