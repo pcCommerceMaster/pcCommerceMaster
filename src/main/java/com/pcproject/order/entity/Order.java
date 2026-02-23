@@ -1,6 +1,11 @@
 package com.pcproject.order.entity;
 
+import com.pcproject.admin.entity.Admin;
+import com.pcproject.customer.entity.Customer;
+import com.pcproject.pcproduct.entity.Product;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -19,14 +24,17 @@ public class Order {
     @Column(nullable = false, unique = true)
     private String orderNumber;
 
-    @Column(nullable = false)
-    private Long customerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
 
-    @Column(nullable = false)
-    private Long productId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
 
-    @Column
-    private Long adminId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "admin_id")
+    private Admin admin;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -50,11 +58,11 @@ public class Order {
 
     private LocalDateTime deletedAt;
 
-    public Order(String orderNumber, Long customerId, Long productId, Long adminId, Integer quantity, Long unitPrice, OrderStatus status) {
+    public Order(String orderNumber, Customer customer, Product product, Admin admin, Integer quantity, Long unitPrice, OrderStatus status) {
         this.orderNumber = orderNumber;
-        this.customerId = customerId;
-        this.productId = productId;
-        this.adminId = adminId;
+        this.customer = customer;
+        this.product = product;
+        this.admin = admin;
         this.quantity = quantity;
         this.unitPrice = unitPrice;
         this.totalAmount = unitPrice * quantity;
