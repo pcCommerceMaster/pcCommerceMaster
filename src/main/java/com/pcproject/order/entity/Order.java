@@ -4,6 +4,8 @@ import com.pcproject.admin.entity.Admin;
 import com.pcproject.customer.entity.Customer;
 import com.pcproject.pcproduct.entity.Product;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -66,6 +68,11 @@ public class Order {
         this.totalAmount = unitPrice * quantity;
         this.status = status;
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void updateStatus(OrderStatus status) {
+        this.status = status;
         this.updatedAt = LocalDateTime.now();
     }
 }

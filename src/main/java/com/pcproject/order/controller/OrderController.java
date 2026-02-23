@@ -1,22 +1,37 @@
 package com.pcproject.order.controller;
 
-import com.pcproject.order.dto.OrderDetailResponse;
-import com.pcproject.order.dto.OrderListResponse;
-import com.pcproject.order.dto.OrderSearchRequest;
+import com.pcproject.order.dto.*;
 import com.pcproject.order.service.OrderService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+
+@RequestMapping("/api/orders")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/orders")
 public class OrderController {
 
     private final OrderService orderService;
+
+    // 주문 생성(POST)
+    @PostMapping
+    public ResponseEntity<CreateOrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
+        CreateOrderResponse result = orderService.createOrder(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    }
+
+    // 주문 상태 수정(PATCH)
+    @PatchMapping("/{orderId}/status")
+    public ResponseEntity<UpdateOrderResponse> updateOrderStatus(
+            @PathVariable Long orderId,
+            @Valid @RequestBody UpdateOrderRequest request) {
+
+        UpdateOrderResponse result = orderService.updateOrderStatus(orderId, request);
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
 
     @GetMapping
     public ResponseEntity<OrderListResponse> getOrders(OrderSearchRequest request) {
