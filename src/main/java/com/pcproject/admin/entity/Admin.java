@@ -107,4 +107,22 @@ public class Admin {
         if (isDeleted()) throw new IllegalStateException("삭제된 계정입니다.");
         this.password = encodedPassword;
     }
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Getter
+@NoArgsConstructor
+@Table(name = "admins")
+public class Admin {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    private String email;
+
+    private String role;
 }
