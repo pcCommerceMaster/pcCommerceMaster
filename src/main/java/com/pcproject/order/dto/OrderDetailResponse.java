@@ -33,7 +33,7 @@ public class OrderDetailResponse {
                 order.getStatus(),
                 order.getAdmin() != null ? order.getAdmin().getName() : null,
                 order.getAdmin() != null ? order.getAdmin().getEmail() : null,
-                order.getAdmin() != null ? order.getAdmin().getRole() : null
+                order.getAdmin() != null ? order.getAdmin().getRole().name() : null
         );
     }
 }
