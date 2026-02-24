@@ -14,6 +14,9 @@ public class OrderSpecification {
     public static Specification<Order> searchByKeyword(String keyword) {
         return (root, query, criteriaBuilder) -> {
             if (keyword == null || keyword.trim().isEmpty()) return criteriaBuilder.conjunction(); // 키워드 비어있으면 전체 조회
+            if (query != null) {
+                query.distinct(true);
+            }
 
             Join<Order, Customer> customerJoin = root.join("customer", JoinType.LEFT); // 고객 정보 삭제 시에도 유지
 
@@ -28,6 +31,18 @@ public class OrderSpecification {
             if (status == null) return criteriaBuilder.conjunction(); // 상태 비어있으면 전체 조회
 
             return criteriaBuilder.equal(root.get("status"), status);
+        };
+    }
+
+    // N+1 방지 fetch join
+    public static Specification<Order> fetchAssociations() {
+        return (root, query, criteriaBuilder) -> {
+            if (query != null && Long.class != query.getResultType()) {
+                root.fetch("customer", JoinType.LEFT);
+                root.fetch("product", JoinType.LEFT);
+                root.fetch("admin", JoinType.LEFT);
+            }
+            return criteriaBuilder.conjunction();
         };
     }
 }
