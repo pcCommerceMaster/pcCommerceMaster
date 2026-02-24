@@ -70,4 +70,45 @@ public class Product {
     public boolean isDeleted() {
         return deletedAt != null;
     }
+
+    // 상품 정보 수정
+    public void updateInfo(String productName,
+                           ProductCategory category,
+                           Long price) {
+        this.productName = productName;
+        this.category = category;
+        this.price = price;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // 재고 증가
+    public void increaseStock(int quantity) {
+        this.stock += quantity;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // 재고 감소
+    public void decreaseStock(int quantity) {
+        this.stock -= quantity;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // 상태 변경
+    public void changeStatus(ProductStatus status) {
+        this.status = status;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // 재고 기반 상태 자동 동기화
+    public void syncStatusByStock() {
+        if (this.status == ProductStatus.DISCONTINUED) {
+            return;
+        }
+
+        if (this.stock <= 0) {
+            this.status = ProductStatus.SOLD_OUT;
+        } else {
+            this.status = ProductStatus.ON_SALE;
+        }
+    }
 }

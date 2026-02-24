@@ -133,4 +133,73 @@ public class ProductService {
         );
         return new ProductDetailResponse(product);
     }
+
+    // 상품 정보 수정
+    @Transactional
+    public ProductUpdateResponse updateProduct(Long productId,
+                                               ProductUpdateRequest request) {
+
+        Product product = productRepository
+                .findByIdAndDeletedAtIsNull(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        product.updateInfo(
+                request.getProductName(),
+                request.getCategory(),
+                request.getPrice()
+        );
+
+        return new ProductUpdateResponse(product);
+    }
+
+    // 상품 재고 변경
+    @Transactional
+    public ProductStockUpdateResponse updateStock(Long productId,
+                                                  ProductStockUpdateRequest request) {
+
+        Product product = productRepository
+                .findWithLockByIdAndDeletedAtIsNull(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        if (request.getQuantity() <= 0) {
+            throw new CustomException(ErrorCode.INVALID_INPUT);
+        }
+
+        if ("INCREASE".equals(request.getType())) {
+            product.increaseStock(request.getQuantity());
+
+        } else if ("DECREASE".equals(request.getType())) {
+
+            if (product.getStock() < request.getQuantity()) {
+                throw new CustomException(ErrorCode.PRODUCT_STOCK_INSUFFICIENT);
+            }
+
+            product.decreaseStock(request.getQuantity());
+
+        } else {
+            throw new CustomException(ErrorCode.INVALID_INPUT);
+        }
+        // 재고 자동 동기화
+        product.syncStatusByStock();
+
+        return new ProductStockUpdateResponse(product);
+    }
+
+    // 상품 상태 변경
+    @Transactional
+    public ProductStatusUpdateResponse updateStatus(Long productId,
+                                                    ProductStatusUpdateRequest request) {
+
+        Product product = productRepository
+                .findByIdAndDeletedAtIsNull(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        if (product.getStatus() == ProductStatus.DISCONTINUED) {
+            throw new CustomException(ErrorCode.PRODUCT_DISCONTINUED);
+        }
+
+        product.changeStatus(request.getStatus());
+
+        return new ProductStatusUpdateResponse(product);
+    }
 }

@@ -51,4 +51,50 @@ public class ProductController {
                 ApiResponse.success("상품 상세 조회 성공", response)
         );
     }
+
+    // 상품 정보 수정
+    @PatchMapping("/{productId}")
+    public ResponseEntity<ApiResponse<ProductUpdateResponse>> updateProduct(
+            @PathVariable Long productId,
+            @Valid @RequestBody ProductUpdateRequest request
+    ) {
+
+        ProductUpdateResponse response =
+                productService.updateProduct(productId, request);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("상품 수정 완료", response)
+        );
+    }
+
+    // 상품 재고 변경
+    @PatchMapping("/{productId}/stock")
+    public ResponseEntity<ApiResponse<ProductStockUpdateResponse>> updateStock(
+            @PathVariable Long productId,
+            @Valid @RequestBody ProductStockUpdateRequest request
+    ) {
+
+        ProductStockUpdateResponse response =
+                productService.updateStock(productId, request);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("재고 변경 완료", response)
+        );
+    }
+
+    // 상품 상태 변경
+    @PatchMapping("/{productId}/status")
+    public ResponseEntity<ApiResponse<ProductStatusUpdateResponse>> updateStatus(
+            @PathVariable Long productId,
+            @Valid @RequestBody ProductStatusUpdateRequest request
+    ) {
+
+        ProductStatusUpdateResponse response =
+                productService.updateStatus(productId, request);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("상품 상태 변경 완료", response)
+        );
+    }
+
 }
