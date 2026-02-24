@@ -1,5 +1,7 @@
 package com.pcproject.order.service;
 
+import com.pcproject.customer.entity.Customer;
+import com.pcproject.customer.repository.CustomerRepository;
 import com.pcproject.order.dto.*;
 import com.pcproject.global.exception.CustomException;
 import com.pcproject.global.exception.ErrorCode;
@@ -8,7 +10,8 @@ import com.pcproject.order.entity.Order;
 import com.pcproject.order.entity.OrderStatus;
 import com.pcproject.order.repository.OrderRepository;
 import com.pcproject.order.repository.OrderSpecification;
-import jakarta.validation.Valid;
+import com.pcproject.pcproduct.entity.Product;
+import com.pcproject.pcproduct.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,10 +29,20 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
+    private final CustomerRepository customerRepository;
+    private final ProductRepository productRepository;
 
     // 주문 생성(POST)
     @Transactional
     public CreateOrderResponse createOrder(CreateOrderRequest request) {
+
+        // 고객 id 검증 및 공통 에러 처리
+        Customer customer = customerRepository.findById(request.getCustomerId())
+                .orElseThrow(()-> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
+
+        // 상품 id 검증 및 공통 에러 처리
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
         // 주문번호(임시) ORD-생성시간-랜덤
         String orderNumber =
@@ -42,8 +55,8 @@ public class OrderService {
         // 관리자 Id 임시로 null값 넣음
         Order order = new Order(
                 orderNumber,
-                request.getCustomerId(),
-                request.getProductId(),
+                customer,
+                product,
                 null,
                 request.getQuantity(),
                 unitPrice,
