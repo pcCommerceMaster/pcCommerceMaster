@@ -10,6 +10,7 @@ import com.pcproject.pcproduct.entity.ProductCategory;
 import com.pcproject.pcproduct.entity.ProductStatus;
 import com.pcproject.pcproduct.entity.StockChangeType;
 import com.pcproject.pcproduct.repository.ProductRepository;
+import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -86,9 +87,15 @@ public class ProductService {
         Pageable pageable = PageRequest.of(page -1, size, sort);
 
         // 기본 조건 - 삭제 되지 않은 상품만
-        Specification<Product> spec =
-                (root, query, cb)
-                        -> cb.isNull(root.get("deletedAt"));
+        Specification<Product> spec = (root, query, cb) -> {
+
+            if (!Long.class.equals(query.getResultType())) {
+                root.fetch("admin", JoinType.INNER);
+                query.distinct(true);
+            }
+
+            return cb.isNull(root.get("deletedAt"));
+        };
         //키워드 검색
         if (keyword != null && !keyword.isBlank()) {
 
@@ -118,8 +125,8 @@ public class ProductService {
         return new ProductListResponseWrapper(
                 productPage.getContent().stream()
                         .map(ProductListResponse::new).toList(),
-                page,
-                size,
+                productPage.getNumber() + 1,
+                productPage.getSize(),
                 productPage.getTotalElements(),
                 productPage.getTotalPages()
         );
@@ -128,7 +135,7 @@ public class ProductService {
     // 상품 상세 조회
     @Transactional(readOnly = true)
     public ProductDetailResponse getProductDetail(Long productId) {
-        Product product = productRepository.findByIdAndDeletedAtIsNull(productId)
+        Product product = productRepository.findWithAdminByIdAndDeletedAtIsNull(productId)
                 .orElseThrow(
                 () -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND)
         );

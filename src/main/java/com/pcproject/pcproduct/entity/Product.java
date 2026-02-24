@@ -92,7 +92,7 @@ public class Product {
     // 재고 감소
     public void decreaseStock(int quantity) {
         if (this.stock < quantity) {
-            throw new CustomException(ErrorCode.PRODUCT_STOCK_INSUFFICIENT);
+            throw new CustomException(ErrorCode.PRODUCT_SOLD_OUT);
         }
         this.stock -= quantity;
         this.updatedAt = LocalDateTime.now();
