@@ -1,6 +1,8 @@
 package com.pcproject.pcproduct.entity;
 
 import com.pcproject.admin.entity.Admin;
+import com.pcproject.global.exception.CustomException;
+import com.pcproject.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -89,6 +91,9 @@ public class Product {
 
     // 재고 감소
     public void decreaseStock(int quantity) {
+        if (this.stock < quantity) {
+            throw new CustomException(ErrorCode.PRODUCT_STOCK_INSUFFICIENT);
+        }
         this.stock -= quantity;
         this.updatedAt = LocalDateTime.now();
     }

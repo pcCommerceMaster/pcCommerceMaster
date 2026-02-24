@@ -8,6 +8,7 @@ import com.pcproject.pcproduct.dto.*;
 import com.pcproject.pcproduct.entity.Product;
 import com.pcproject.pcproduct.entity.ProductCategory;
 import com.pcproject.pcproduct.entity.ProductStatus;
+import com.pcproject.pcproduct.entity.StockChangeType;
 import com.pcproject.pcproduct.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -42,7 +43,7 @@ public class ProductService {
         return new ProductCreateResponse(savedProduct);
     }
 
-    // 상풀 리스트 조회
+    // 상품 리스트 조회
     @Transactional(readOnly = true)
     public ProductListResponseWrapper getProducts(ProductSearchRequest request) {
 
@@ -54,14 +55,6 @@ public class ProductService {
         String category = request.getCategory();
         String status = request.getStatus();
 
-        // 페이지 검증
-        if (page < 1) {
-            throw new CustomException(ErrorCode.INVALID_INPUT);
-        }
-        // 사이즈 검증
-        if (size < 1 || size > 100) {
-            throw new CustomException(ErrorCode.INVALID_INPUT);
-        }
         // 정렬 기준 검증
         if (!sortBy.equals("price") && !sortBy.equals("stock") && !sortBy.equals("createdAt")) {
             throw new CustomException(ErrorCode.INVALID_INPUT);
@@ -98,8 +91,16 @@ public class ProductService {
                         -> cb.isNull(root.get("deletedAt"));
         //키워드 검색
         if (keyword != null && !keyword.isBlank()) {
+
+            String safeKeyword = keyword
+                    .replace("\\", "\\\\")
+                    .replace("%", "\\%")
+                    .replace("_", "\\_");
+
             spec = spec.and((root, query, cb)
-                    -> cb.like(root.get("productName"), "%" + keyword + "%"));
+                    -> cb.like(root.get("productName"),
+                    "%" + safeKeyword + "%",
+                    '\\'));
         }
         // 카테고리 필터
         if (category != null) {
@@ -161,23 +162,10 @@ public class ProductService {
                 .findWithLockByIdAndDeletedAtIsNull(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        if (request.getQuantity() <= 0) {
-            throw new CustomException(ErrorCode.INVALID_INPUT);
-        }
-
-        if ("INCREASE".equals(request.getType())) {
+        if (request.getType() == StockChangeType.INCREASE) {
             product.increaseStock(request.getQuantity());
-
-        } else if ("DECREASE".equals(request.getType())) {
-
-            if (product.getStock() < request.getQuantity()) {
-                throw new CustomException(ErrorCode.PRODUCT_STOCK_INSUFFICIENT);
-            }
-
-            product.decreaseStock(request.getQuantity());
-
         } else {
-            throw new CustomException(ErrorCode.INVALID_INPUT);
+            product.decreaseStock(request.getQuantity());
         }
         // 재고 자동 동기화
         product.syncStatusByStock();

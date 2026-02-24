@@ -1,5 +1,6 @@
 package com.pcproject.pcproduct.dto;
 
+import com.pcproject.pcproduct.entity.StockChangeType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -12,5 +13,5 @@ public class ProductStockUpdateRequest {
     private Integer quantity;
 
     @NotNull
-    private String type; // INCREASE or DECREASE
+    private StockChangeType type;
 }

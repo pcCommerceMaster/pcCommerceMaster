@@ -30,7 +30,7 @@ public class ProductController {
     // 상품 리스트 조회
     @GetMapping
     public ResponseEntity<ApiResponse<ProductListResponseWrapper>> getProducts(
-            @ModelAttribute ProductSearchRequest request
+            @Valid @ModelAttribute ProductSearchRequest request
     ) {
         ProductListResponseWrapper response =
                 productService.getProducts(request);
@@ -96,5 +96,4 @@ public class ProductController {
                 ApiResponse.success("상품 상태 변경 완료", response)
         );
     }
-
 }
