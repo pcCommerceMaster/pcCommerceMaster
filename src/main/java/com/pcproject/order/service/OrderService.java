@@ -38,7 +38,9 @@ public class OrderService {
 
     // 주문 생성(POST)
     @Transactional
-    public CreateOrderResponse createOrder(CreateOrderRequest request, LoginAdmin loginAdmin) {
+    public CreateOrderResponse createOrder(
+            CreateOrderRequest request,
+            LoginAdmin loginAdmin) {
 
         // 세션 로그인 검증
         if (loginAdmin == null) {
@@ -100,7 +102,19 @@ public class OrderService {
 
     // 주문 상태 변경(PATCH)
     @Transactional
-    public UpdateOrderResponse updateOrderStatus(Long orderId, UpdateOrderRequest request) {
+    public UpdateOrderResponse updateOrderStatus(
+            Long orderId,
+            UpdateOrderRequest request,
+            LoginAdmin loginAdmin) {
+
+        // 세션 로그인 검증
+        if (loginAdmin == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // Admin 조회
+        adminRepository.findById(loginAdmin.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.ADMIN_NOT_FOUND));
 
         // 주문 조회(공통 에러 코드로 변경함)
         Order order = orderRepository.findById(orderId)

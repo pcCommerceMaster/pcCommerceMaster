@@ -28,8 +28,4 @@ public class CreateOrderRequest {
     @NotNull
     @Min(1)
     private Integer quantity;
-
-    // 요청 or 인증 추출
-    // private Long adminId;
-
 }
