@@ -12,6 +12,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,19 +35,19 @@ public class AdminMeController {
     }
 
     @GetMapping
-    public ApiResponse<MeResponse> me(HttpServletRequest request) {
-        return ApiResponse.success("내 프로필 조회 성공", adminMeService.me(myId(request)));
+    public ResponseEntity<ApiResponse<MeResponse>> me(HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("내 프로필 조회 성공", adminMeService.me(myId(request))));
     }
 
     @PutMapping
-    public ApiResponse<Void> updateMe(@Valid @RequestBody MeUpdateRequest req, HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<Void>> updateMe(@Valid @RequestBody MeUpdateRequest req, HttpServletRequest request) {
         adminMeService.updateMe(myId(request), req);
-        return ApiResponse.success("내 프로필 수정 성공", null);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("내 프로필 수정 성공", null));
     }
 
     @PatchMapping("/password")
-    public ApiResponse<Void> changePassword(@Valid @RequestBody ChangePasswordRequest req, HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<Void>> changePassword(@Valid @RequestBody ChangePasswordRequest req, HttpServletRequest request) {
         adminMeService.changePassword(myId(request), req);
-        return ApiResponse.success("비밀번호 변경 성공", null);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("비밀번호 변경 성공", null));
     }
 }
