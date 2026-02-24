@@ -6,12 +6,6 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-/**
- * Created by IntelliJ IDEA.
- * User: jeongjihun
- * Date: 26. 2. 20.
- * Time: 오후 8:07
- **/
 
 @Getter
 public class CreateOrderResponse {
