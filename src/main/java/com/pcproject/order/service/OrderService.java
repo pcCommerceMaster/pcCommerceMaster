@@ -8,6 +8,7 @@ import com.pcproject.order.entity.Order;
 import com.pcproject.order.entity.OrderStatus;
 import com.pcproject.order.repository.OrderRepository;
 import com.pcproject.order.repository.OrderSpecification;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -62,6 +63,7 @@ public class OrderService {
         );
     }
 
+    // 주문 상태 변경(PATCH)
     @Transactional
     public UpdateOrderResponse updateOrderStatus(Long orderId, UpdateOrderRequest request) {
 
@@ -86,13 +88,50 @@ public class OrderService {
             throw new IllegalStateException("INVALID_ORDER_STATUS");
         }
 
-        // 4) 상태 변경 + updatedAt 갱신 (엔티티 메서드로 하는 게 좋음)
+        // 4) 상태 변경 + updatedAt 갱신
         order.updateStatus(target);
 
         // 5) 저장
         orderRepository.save(order);
 
-        return new UpdateOrderResponse(order.getId(), order.getStatus(), order.getUpdatedAt());
+        return new UpdateOrderResponse(
+                order.getId(),
+                order.getStatus(),
+                order.getUpdatedAt()
+        );
+    }
+
+
+
+    // 주문 취소(PATCH)
+    @Transactional
+    public CancelOrderResponse cancelOrder(Long orderId, CancelOrderRequest request) {
+
+        // 1) 주문 조회(추후 공통 에러 코드로 변경 예정)
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalStateException("ORDER_NOT_FOUND"));
+
+        // 2) PREPARING만 취소 가능(추후 공통 에러 코드로 변경 예정)
+        if (order.getStatus() != OrderStatus.PREPARING) {
+            throw new IllegalStateException("ORDER_CANCEL_NOT_ALLOWED");
+        }
+
+        // 3) 취소 사유 저장 + 상태 변경
+        order.cancel(request.getCancelReason());
+
+        // 4) TODO: 재고 복구 처리(추후 구현 예정)
+        // - 주문 수량만큼 product.stock += quantity
+        // - product.status 자동 전환 (단, DISCONTINUED면 상태 유지)
+
+        // 5) 저장
+        orderRepository.save(order);
+
+        return new CancelOrderResponse(
+                order.getId(),
+                order.getStatus(),
+                order.getCancelReason(),
+                order.getUpdatedAt()
+        );
     }
 
 
@@ -126,7 +165,5 @@ public class OrderService {
 
         return OrderDetailResponse.from(order);
     }
-
-
 
 }
