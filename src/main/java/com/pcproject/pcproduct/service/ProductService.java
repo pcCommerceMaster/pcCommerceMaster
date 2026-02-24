@@ -1,7 +1,7 @@
 package com.pcproject.pcproduct.service;
 
-import com.pc_commerce_master.global.exception.CustomException;
-import com.pc_commerce_master.global.exception.ErrorCode;
+import com.pcproject.global.exception.CustomException;
+import com.pcproject.global.exception.ErrorCode;
 import com.pcproject.admin.entity.Admin;
 import com.pcproject.admin.repository.AdminRepository;
 import com.pcproject.pcproduct.dto.ProductCreateRequest;

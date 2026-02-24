@@ -1,5 +1,7 @@
 package com.pcproject.order.service;
 
+import com.pcproject.customer.entity.Customer;
+import com.pcproject.customer.repository.CustomerRepository;
 import com.pcproject.order.dto.*;
 import com.pcproject.global.exception.CustomException;
 import com.pcproject.global.exception.ErrorCode;
@@ -8,6 +10,8 @@ import com.pcproject.order.entity.Order;
 import com.pcproject.order.entity.OrderStatus;
 import com.pcproject.order.repository.OrderRepository;
 import com.pcproject.order.repository.OrderSpecification;
+import com.pcproject.pcproduct.entity.Product;
+import com.pcproject.pcproduct.repository.ProductRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,6 +30,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
+    private final CustomerRepository customerRepository;
+    private final ProductRepository productRepository;
 
     // 주문 생성(POST)
     @Transactional
@@ -37,13 +43,20 @@ public class OrderService {
                 + "-" + UUID.randomUUID().toString().substring(0, 4);
 
         // 상품 가격(임시)
-        Long unitPrice = 10000L;
+        //Long unitPrice = 10000L;
+        Customer customer = customerRepository.findById(request.getCustomerId())
+                .orElseThrow(() -> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        Long unitPrice = product.getPrice();
 
         // 관리자 Id 임시로 null값 넣음
         Order order = new Order(
                 orderNumber,
-                request.getCustomerId(),
-                request.getProductId(),
+                //request.getCustomerId(),
+                //request.getProductId(),
+                customer,
+                product,
                 null,
                 request.getQuantity(),
                 unitPrice,
@@ -69,11 +82,13 @@ public class OrderService {
 
         // 1) 주문 조회(추후 공통 에러 코드로 변경 예정)
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalStateException("ORDER_NOT_FOUND"));
+                //.orElseThrow(() -> new IllegalStateException("ORDER_NOT_FOUND"));
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         // 2) 최종 상태면 변경 불가(추후 공통 에러 코드로 변경 예정)
         if (order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.DELIVERED) {
-            throw new IllegalStateException("INVALID_ORDER_STATUS");
+            //throw new IllegalStateException("INVALID_ORDER_STATUS");
+            throw new CustomException(ErrorCode.ORDER_CANCEL_NOT_ALLOWED);
         }
 
         OrderStatus target = request.getStatus();
@@ -85,7 +100,8 @@ public class OrderService {
                         (current == OrderStatus.SHIPPING && target == OrderStatus.DELIVERED);
 
         if (!isValid) {
-            throw new IllegalStateException("INVALID_ORDER_STATUS");
+            //throw new IllegalStateException("INVALID_ORDER_STATUS");
+            throw new CustomException(ErrorCode.ORDER_CANCEL_NOT_ALLOWED);
         }
 
         // 4) 상태 변경 + updatedAt 갱신
@@ -109,11 +125,13 @@ public class OrderService {
 
         // 1) 주문 조회(추후 공통 에러 코드로 변경 예정)
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalStateException("ORDER_NOT_FOUND"));
+                //.orElseThrow(() -> new IllegalStateException("ORDER_NOT_FOUND"));
+        .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         // 2) PREPARING만 취소 가능(추후 공통 에러 코드로 변경 예정)
         if (order.getStatus() != OrderStatus.PREPARING) {
-            throw new IllegalStateException("ORDER_CANCEL_NOT_ALLOWED");
+            //throw new IllegalStateException("ORDER_CANCEL_NOT_ALLOWED");
+            throw new CustomException(ErrorCode.ORDER_CANCEL_NOT_ALLOWED);
         }
 
         // 3) 취소 사유 저장 + 상태 변경
