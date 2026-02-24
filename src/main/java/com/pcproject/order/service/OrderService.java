@@ -1,5 +1,8 @@
 package com.pcproject.order.service;
 
+import com.pcproject.admin.dto.LoginAdmin;
+import com.pcproject.admin.entity.Admin;
+import com.pcproject.admin.repository.AdminRepository;
 import com.pcproject.customer.entity.Customer;
 import com.pcproject.customer.repository.CustomerRepository;
 import com.pcproject.order.dto.*;
@@ -31,10 +34,20 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
+    private final AdminRepository adminRepository;
 
     // 주문 생성(POST)
     @Transactional
-    public CreateOrderResponse createOrder(CreateOrderRequest request) {
+    public CreateOrderResponse createOrder(CreateOrderRequest request, LoginAdmin loginAdmin) {
+
+        // 세션 로그인 검증
+        if (loginAdmin == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // Admin 조회
+        Admin admin = adminRepository.findById(loginAdmin.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.ADMIN_NOT_FOUND));
 
         // 고객 id 검증 및 공통 에러 처리
         Customer customer = customerRepository.findById(request.getCustomerId())
@@ -61,12 +74,12 @@ public class OrderService {
         // 상품 가격 스냅샷
         Long unitPrice = product.getPrice();
 
-        // 관리자 Id 임시로 null값 넣음
+        // 주문 생성 (로그인 관리자 정보 포함)
         Order order = new Order(
                 orderNumber,
                 customer,
                 product,
-                null,
+                admin,
                 request.getQuantity(),
                 unitPrice,
                 OrderStatus.PREPARING
