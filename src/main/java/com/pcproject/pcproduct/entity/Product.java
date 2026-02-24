@@ -65,14 +65,6 @@ public class Product {
         this.createdAt = LocalDateTime.now();
     }
 
-    // soft delete
-    public void softDelete() {
-        this.deletedAt = LocalDateTime.now();
-    }
-    public boolean isDeleted() {
-        return deletedAt != null;
-    }
-
     // 상품 정보 수정
     public void updateInfo(String productName,
                            ProductCategory category,
@@ -92,7 +84,7 @@ public class Product {
     // 재고 감소
     public void decreaseStock(int quantity) {
         if (this.stock < quantity) {
-            throw new CustomException(ErrorCode.PRODUCT_SOLD_OUT);
+            throw new CustomException(ErrorCode.PRODUCT_STOCK_INSUFFICIENT);
         }
         this.stock -= quantity;
         this.updatedAt = LocalDateTime.now();
@@ -115,5 +107,19 @@ public class Product {
         } else {
             this.status = ProductStatus.ON_SALE;
         }
+    }
+
+    // soft delete
+    public void softDelete() {
+        this.deletedAt = LocalDateTime.now();
+    }
+    // 복구
+    public void restore() {
+        this.deletedAt = null;
+        this.updatedAt = LocalDateTime.now();
+    }
+    // 삭제 여부
+    public boolean isDeleted() {
+        return deletedAt != null;
     }
 }

@@ -169,14 +169,17 @@ public class ProductService {
                 .findWithLockByIdAndDeletedAtIsNull(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
+        if (product.getStatus() == ProductStatus.DISCONTINUED) {
+            throw new CustomException(ErrorCode.PRODUCT_DISCONTINUED_CONFLICT);
+        }
+
         if (request.getType() == StockChangeType.INCREASE) {
             product.increaseStock(request.getQuantity());
         } else {
             product.decreaseStock(request.getQuantity());
         }
-        // 재고 자동 동기화
-        product.syncStatusByStock();
 
+        product.syncStatusByStock();
         return new ProductStockUpdateResponse(product);
     }
 
@@ -189,11 +192,53 @@ public class ProductService {
                 .findByIdAndDeletedAtIsNull(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        if (product.getStatus() == ProductStatus.DISCONTINUED) {
-            throw new CustomException(ErrorCode.PRODUCT_DISCONTINUED);
-        }
+        ProductStatus current = product.getStatus();
+        ProductStatus next = request.getStatus();
 
-        product.changeStatus(request.getStatus());
+        // DISCONTINUED 상태 변경 불가
+        if (current == ProductStatus.DISCONTINUED) {
+            throw new CustomException(ErrorCode.PRODUCT_DISCONTINUED_CONFLICT);
+        }
+        // stock=0 일때 ON_SALE 불가
+        if (next == ProductStatus.ON_SALE && product.getStock() <= 0) {
+            throw new CustomException(ErrorCode.PRODUCT_STATUS_CONFLICT);
+        }
+        // 상태 전이 규칙 검증
+        boolean isValid = switch (current) {
+            case ON_SALE -> next == ProductStatus.SOLD_OUT || next == ProductStatus.DISCONTINUED;
+            case SOLD_OUT -> next == ProductStatus.ON_SALE || next == ProductStatus.DISCONTINUED;
+            default -> false;
+        };
+        if (!isValid) {
+            throw new CustomException(ErrorCode.PRODUCT_STATUS_CONFLICT);
+        }
+        product.changeStatus(next);
+        return new ProductStatusUpdateResponse(product);
+    }
+
+    // 상품 삭제
+    @Transactional
+    public void deleteProduct(Long productId) {
+        Product product = productRepository.
+                findByIdAndDeletedAtIsNull(productId).orElseThrow(
+                        () -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND)
+                );
+        product.softDelete();
+    }
+
+    // 상품 복구
+    @Transactional
+    public ProductStatusUpdateResponse restoreProduct(Long productId) {
+        Product product = productRepository
+                .findById(productId).orElseThrow(
+                        () -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // deleted_at IS NULL 이면 복구 불가
+        if (!product.isDeleted()){
+            throw new CustomException(ErrorCode.PRODUCT_NOT_DELETED);
+        }
+        product.restore();
+        product.syncStatusByStock();
 
         return new ProductStatusUpdateResponse(product);
     }

@@ -30,6 +30,9 @@ public enum ErrorCode {
     PRODUCT_DISCONTINUED(HttpStatus.BAD_REQUEST, "단종된 상품입니다."),
     PRODUCT_SOLD_OUT(HttpStatus.BAD_REQUEST, "품절된 상품입니다."),
     PRODUCT_STOCK_INSUFFICIENT(HttpStatus.BAD_REQUEST, "재고가 부족합니다."),
+    PRODUCT_STATUS_CONFLICT(HttpStatus.CONFLICT, "허용되지 않은 상태 전이입니다."),
+    PRODUCT_DISCONTINUED_CONFLICT(HttpStatus.CONFLICT, "단종 상태는 변경할 수 없습니다."),
+    PRODUCT_NOT_DELETED(HttpStatus.BAD_REQUEST, "삭제되지 않은 상품은 복구할 수 없습니다."),
 
     // 주문
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 주문입니다."),
