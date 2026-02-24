@@ -11,30 +11,31 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Admin {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable=false, length=50)
+    @Column(nullable = false, length = 50)
     private String name;
 
-    @Column(nullable=false, length=100)
+    @Column(nullable = false, length = 100)
     private String email;
 
-    @Column(nullable=false, length=255)
+    @Column(nullable = false, length = 255)
     private String password;
 
-    @Column(name = "phone_number", nullable=false, length=20)
+    @Column(name = "phone_number", nullable = false, length = 20)
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable=false, length=30)
+    @Column(nullable = false, length = 30)
     private AdminRole role;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable=false, length=20)
+    @Column(nullable = false, length = 20)
     private AdminStatus status;
 
-    @Column(name = "created_at", nullable=false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "approved_at")
@@ -43,10 +44,9 @@ public class Admin {
     @Column(name = "rejected_at")
     private LocalDateTime rejectedAt;
 
-    @Column(name = "reject_reason", length=255)
+    @Column(name = "reject_reason", length = 255)
     private String rejectReason;
 
-    // ✅ 소프트 삭제(ERD엔 없지만 팀 정책)
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
@@ -107,22 +107,6 @@ public class Admin {
         if (isDeleted()) throw new IllegalStateException("삭제된 계정입니다.");
         this.password = encodedPassword;
     }
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
-@Entity
-@Getter
-@NoArgsConstructor
-@Table(name = "admins")
-public class Admin {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private String name;
-
-    private String email;
-
-    private String role;
 }
+
+

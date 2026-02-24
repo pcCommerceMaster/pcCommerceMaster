@@ -5,22 +5,28 @@ import com.pcproject.pcproduct.entity.ProductCategory;
 import com.pcproject.pcproduct.entity.ProductStatus;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 public class ProductCreateResponse {
-    private Long id;
-    private String name;
-    private ProductCategory category;
-    private int price;
-    private int stock;
-    private ProductStatus status;
+    private final Long id;
+    private final String productName;
+    private final ProductCategory category;
+    private final Long price;
+    private final Integer stock;
+    private final ProductStatus status;
+    private final LocalDateTime createdAt;
+    private final String adminName;
 
     public ProductCreateResponse(Product product) {
         this.id = product.getId();
-        this.name = product.getName();
+        this.productName = product.getProductName();
         this.category = product.getCategory();
         this.price = product.getPrice();
         this.stock = product.getStock();
         this.status = product.getStatus();
+        this.createdAt = product.getCreatedAt();
+        this.adminName = product.getAdmin().getName();
     }
 
 }

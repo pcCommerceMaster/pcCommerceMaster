@@ -3,12 +3,15 @@ package com.pcproject.order.controller;
 import com.pcproject.order.dto.*;
 import com.pcproject.order.service.OrderService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 
+@Validated
 @RequestMapping("/api/orders")
 @RestController
 @RequiredArgsConstructor
@@ -26,12 +29,22 @@ public class OrderController {
     // 주문 상태 수정(PATCH)
     @PatchMapping("/{orderId}/status")
     public ResponseEntity<UpdateOrderResponse> updateOrderStatus(
-            @PathVariable Long orderId,
+            @PathVariable @Positive Long orderId,
             @Valid @RequestBody UpdateOrderRequest request) {
 
         UpdateOrderResponse result = orderService.updateOrderStatus(orderId, request);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
+
+    // 주문 취소(PATCH)
+    @PatchMapping("/{orderId}/cancel")
+    public ResponseEntity<CancelOrderResponse> cancelOrder(
+            @PathVariable @Positive Long orderId,
+            @Valid @RequestBody CancelOrderRequest request) {
+        CancelOrderResponse result = orderService.cancelOrder(orderId, request);
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
 
     @GetMapping
     public ResponseEntity<OrderListResponse> getOrders(@Valid OrderSearchRequest request) {

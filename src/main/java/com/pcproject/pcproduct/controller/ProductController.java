@@ -4,12 +4,11 @@ import com.pcproject.global.response.ApiResponse;
 import com.pcproject.pcproduct.dto.ProductCreateRequest;
 import com.pcproject.pcproduct.dto.ProductCreateResponse;
 import com.pcproject.pcproduct.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,10 +17,13 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public ResponseEntity<?> createProduct(@RequestBody ProductCreateRequest request) {
-        ProductCreateResponse response = productService.createProduct(request);
+    public ResponseEntity<ApiResponse<ProductCreateResponse>> createProduct(
+            @Valid @RequestBody ProductCreateRequest request,
+            @RequestAttribute("adminId") Long adminId
+            ) {
+        ProductCreateResponse response = productService.createProduct(request, adminId);
 
-        return ResponseEntity.status(201)
-                .body(ApiResponse.created("상품 등록 성공", response));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created("상품 등록 완료", response));
     }
 }

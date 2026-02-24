@@ -1,8 +1,11 @@
 package com.pcproject.pcproduct.entity;
 
+import com.pcproject.admin.entity.Admin;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -13,26 +16,58 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-
+    // 상품명
+    @Column(nullable = false, length = 100)
+    private String productName;
+    // 카테고리
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ProductCategory category;
-    private int price;
-    private int stock;
-
+    // 가격
+    @Column(nullable = false)
+    private Long price;
+    // 재고
+    @Column(nullable = false)
+    private Integer stock;
+    // 상태
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ProductStatus status;
+    // 등록 관리자
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "admin_id", nullable = false)
+    private Admin admin;
+    // 생성일
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+    // 수정일
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    // soft delete
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
-    public Product(String name,
+    public Product(String productName,
                    ProductCategory category,
-                   int price,
-                   int stock,
-                   ProductStatus status
+                   Long price,
+                   Integer stock,
+                   ProductStatus status,
+                   Admin admin
                    ) {
-        this.name = name;
+        this.productName = productName;
         this.category = category;
         this.price = price;
         this.stock = stock;
         this.status = status;
+        this.admin = admin;
+        this.createdAt = LocalDateTime.now();
+    }
+
+    // soft delete
+    public void softDelete() {
+        this.deletedAt = LocalDateTime.now();
+    }
+    public boolean isDeleted() {
+        return deletedAt != null;
     }
 }
