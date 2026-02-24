@@ -47,21 +47,14 @@ public class OrderController {
 
 
     @GetMapping
-    public ResponseEntity<OrderListResponse> getOrders(OrderSearchRequest request) {
-        OrderListResponse response = orderService.getOrders(
-                request.getKeyword(),
-                request.getStatus(),
-                request.getPage(),
-                request.getSize(),
-                request.getSortBy(),
-                request.getDirection()
-        );
+    public ResponseEntity<OrderListResponse> getOrders(@Valid OrderSearchRequest request) {
+        OrderListResponse response = orderService.getOrders(request);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OrderDetailResponse> getOrder(@PathVariable Long id) {
-        OrderDetailResponse response = orderService.getOrder(id);
+    public ResponseEntity<OrderDetailResponse> getOrder(@PathVariable Long orderId) {
+        OrderDetailResponse response = orderService.getOrder(orderId);
         return ResponseEntity.ok(response);
     }
 }
