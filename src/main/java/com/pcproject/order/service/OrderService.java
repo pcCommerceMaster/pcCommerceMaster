@@ -2,6 +2,7 @@ package com.pcproject.order.service;
 
 import com.pcproject.admin.dto.LoginAdmin;
 import com.pcproject.admin.entity.Admin;
+import com.pcproject.admin.entity.AdminRole;
 import com.pcproject.admin.repository.AdminRepository;
 import com.pcproject.customer.entity.Customer;
 import com.pcproject.customer.repository.CustomerRepository;
@@ -24,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -35,20 +35,32 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final AdminRepository adminRepository;
 
-    // 주문 생성(POST)
-    @Transactional
-    public CreateOrderResponse createOrder(
-            CreateOrderRequest request,
-            LoginAdmin loginAdmin) {
+    // CS 담당 관리자 인증 및 인가 검증 후 Admin 반환
+    private Admin validateCsAdmin(LoginAdmin loginAdmin) {
 
         // 세션 로그인 검증
         if (loginAdmin == null) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
+        // 권한 검증(CS_ADMIN)
+        if (loginAdmin.getRole() != AdminRole.CS_ADMIN) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+
         // Admin 조회
-        Admin admin = adminRepository.findById(loginAdmin.getId())
+        return adminRepository.findById(loginAdmin.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.ADMIN_NOT_FOUND));
+    }
+
+    // 주문 생성(POST)
+    @Transactional
+    public CreateOrderResponse createOrder(
+            CreateOrderRequest request,
+            LoginAdmin loginAdmin) {
+
+        // CS 담당 관리자 검증
+        Admin admin = validateCsAdmin(loginAdmin);
 
         // 고객 id 검증 및 공통 에러 처리
         Customer customer = customerRepository.findById(request.getCustomerId())
@@ -106,14 +118,7 @@ public class OrderService {
             UpdateOrderRequest request,
             LoginAdmin loginAdmin) {
 
-        // 세션 로그인 검증
-        if (loginAdmin == null) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED);
-        }
-
-        // Admin 조회
-        adminRepository.findById(loginAdmin.getId())
-                .orElseThrow(() -> new CustomException(ErrorCode.ADMIN_NOT_FOUND));
+        validateCsAdmin(loginAdmin);
 
         // 주문 존재 여부 검증
         Order order = orderRepository.findById(orderId)
@@ -136,23 +141,16 @@ public class OrderService {
             CancelOrderRequest request,
             LoginAdmin loginAdmin) {
 
-        // 세션 로그인 검증
-        if (loginAdmin == null) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED);
-        }
-
-        // Admin 조회
-        adminRepository.findById(loginAdmin.getId())
-                .orElseThrow(() -> new CustomException(ErrorCode.ADMIN_NOT_FOUND));
+        validateCsAdmin(loginAdmin);
 
         // 주문 존재 여부 검증
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
-        // 취소 사유 검증 및 저장, 상태 변경은 도메인 정책에 따라 엔티티에서 처리
+        // 주문 취소 정책은 Order 도메인에서 처리
         order.cancel(request.getCancelReason());
 
-        // 취소된 주문 수량만큼 상품 재고 복구 (상품 도메인 정책 적용)
+        // 취소 수량만큼 재고 복구 (Product 도메인 정책 적용)
         Product product = order.getProduct();
         product.restoreStock(order.getQuantity());
 
