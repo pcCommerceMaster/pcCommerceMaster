@@ -62,18 +62,18 @@ public class OrderService {
         // CS 담당 관리자 검증
         Admin admin = validateCsAdmin(loginAdmin);
 
-        // 고객 id 검증 및 공통 에러 처리
-        Customer customer = customerRepository.findById(request.getCustomerId())
-                .orElseThrow(()-> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
-
-        // 상품 id 검증 및 공통 에러 처리
-        Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-
         // DTO와 함께 quantity 중복 체크(혹시 모를 우회 완전 차단)
         if (request.getQuantity() < 1) {
             throw new CustomException(ErrorCode.ORDER_QUANTITY_INVALID);
         }
+
+        // 고객 조회
+        Customer customer = customerRepository.findById(request.getCustomerId())
+                .orElseThrow(()-> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
+
+        // 상품 조회 (비관적 락 적용: 재고 동시성 제어)
+        Product product = productRepository.findByIdForUpdate(request.getProductId())
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
         // 재고가 상태 검증 후 차감
         product.validateOrderable();
