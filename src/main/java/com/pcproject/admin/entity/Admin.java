@@ -47,7 +47,6 @@ public class Admin {
     @Column(name = "reject_reason", length = 255)
     private String rejectReason;
 
-    // ✅ 소프트 삭제(ERD엔 없지만 팀 정책)
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
@@ -109,3 +108,5 @@ public class Admin {
         this.password = encodedPassword;
     }
 }
+
+

@@ -24,12 +24,39 @@ public class AdminManagementService {
     private final AdminRepository adminRepository;
 
     @Transactional(readOnly = true)
-    public Page<AdminSummaryResponse> list(
-            String keyword, AdminRole role, AdminStatus status,
-            int page, int size, String sortBy, String direction
-    ) {
+    public Page<AdminSummaryResponse> list(AdminSearchCondition condition) {
+
+        String keyword = condition.getKeyword();
+        AdminRole role = condition.getRole();
+        AdminStatus status = condition.getStatus();
+
+        int page = condition.getPage();
+        int size = condition.getSize();
+        String sortBy = condition.getSortBy();
+        String direction = condition.getDirection();
+
+        // page는 1부터 받고 PageRequest는 0부터여서 -1
         int pageIndex = Math.max(page - 1, 0);
-        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+
+        // direction 값이 이상하게 들어오면 기본값 DESC로 안전하게
+        Sort.Direction sortDirection;
+        try {
+            sortDirection = Sort.Direction.fromString(direction); // "asc" / "desc"
+        } catch (IllegalArgumentException e) {
+            sortDirection = Sort.Direction.DESC;
+        }
+
+        // sortBy가 비었으면 기본값
+        if (sortBy == null || sortBy.isBlank()) {
+            sortBy = "createdAt";
+        }
+
+        // size가 0 이하로 들어오면 기본값
+        if (size <= 0) {
+            size = 10;
+        }
+
+        Sort sort = Sort.by(sortDirection, sortBy);
         Pageable pageable = PageRequest.of(pageIndex, size, sort);
 
         Specification<Admin> spec = Specification
@@ -38,7 +65,8 @@ public class AdminManagementService {
                 .and(AdminSpecifications.roleEq(role))
                 .and(AdminSpecifications.statusEq(status));
 
-        return adminRepository.findAll(spec, pageable).map(AdminSummaryResponse::from);
+        return adminRepository.findAll(spec, pageable)
+                .map(AdminSummaryResponse::from);
     }
 
     @Transactional(readOnly = true)
