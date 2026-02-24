@@ -104,4 +104,28 @@ public class Product {
 
         this.updatedAt = LocalDateTime.now();
     }
+
+    // 재고 복구 메서드
+    public void restoreStock(int quantity) {
+
+        if (quantity <= 0) {
+            throw new CustomException(ErrorCode.INVALID_INPUT);
+        }
+
+        this.stock += quantity;
+
+        // 단종(DISCONTINUED) 상품은 재고만 복구하고 상태는 변경하지 않음
+        if (this.status == ProductStatus.DISCONTINUED) {
+            this.updatedAt = LocalDateTime.now();
+            return;
+        }
+
+        // SOLD_OUT 상태에서 재고가 1 이상이면 ON_SALE로 전환
+        if (this.status == ProductStatus.SOLD_OUT && this.stock > 0) {
+            this.status = ProductStatus.ON_SALE;
+        }
+
+        this.updatedAt = LocalDateTime.now();
+    }
+
 }

@@ -140,9 +140,9 @@ public class OrderService {
         // 취소 사유 검증 및 저장, 상태 변경은 도메인 정책에 따라 엔티티에서 처리
         order.cancel(request.getCancelReason());
 
-        // 4) TODO: 재고 복구 처리(추후 구현 예정)
-        // - 주문 수량만큼 product.stock += quantity
-        // - product.status 자동 전환 (단, DISCONTINUED면 상태 유지)
+        // 취소된 주문 수량만큼 상품 재고 복구 (상품 도메인 정책 적용)
+        Product product = order.getProduct();
+        product.restoreStock(order.getQuantity());
 
         return new CancelOrderResponse(
                 order.getId(),
