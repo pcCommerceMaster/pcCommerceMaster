@@ -35,7 +35,7 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
-    // 주문 상태 수정(PATCH)
+    // 주문 상태 수정 (세션 기반 관리자 인증)
     @PatchMapping("/{orderId}/status")
     public ResponseEntity<UpdateOrderResponse> updateOrderStatus(
             @PathVariable @Positive Long orderId,
@@ -49,12 +49,17 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
-    // 주문 취소(PATCH)
+    // 주문 취소 (세션 기반 관리자 인증)
     @PatchMapping("/{orderId}/cancel")
     public ResponseEntity<CancelOrderResponse> cancelOrder(
             @PathVariable @Positive Long orderId,
-            @Valid @RequestBody CancelOrderRequest request) {
-        CancelOrderResponse result = orderService.cancelOrder(orderId, request);
+            @Valid @RequestBody CancelOrderRequest request,
+            HttpSession session) {
+
+        LoginAdmin loginAdmin =
+                (LoginAdmin) session.getAttribute(SessionConst.LOGIN_ADMIN);
+
+        CancelOrderResponse result = orderService.cancelOrder(orderId, request, loginAdmin);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 

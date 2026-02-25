@@ -140,7 +140,19 @@ public class OrderService {
 
     // 주문 취소(PATCH)
     @Transactional
-    public CancelOrderResponse cancelOrder(Long orderId, CancelOrderRequest request) {
+    public CancelOrderResponse cancelOrder(
+            Long orderId,
+            CancelOrderRequest request,
+            LoginAdmin loginAdmin) {
+
+        // 세션 로그인 검증
+        if (loginAdmin == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // Admin 조회
+        adminRepository.findById(loginAdmin.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.ADMIN_NOT_FOUND));
 
         // 주문 존재 여부 검증
         Order order = orderRepository.findById(orderId)
