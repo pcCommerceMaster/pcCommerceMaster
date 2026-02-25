@@ -2,6 +2,8 @@ package com.pcproject.order.entity;
 
 import com.pcproject.admin.entity.Admin;
 import com.pcproject.customer.entity.Customer;
+import com.pcproject.global.exception.CustomException;
+import com.pcproject.global.exception.ErrorCode;
 import com.pcproject.pcproduct.entity.Product;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -67,16 +69,34 @@ public class Order {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // 주문 상태 변경 메서드
-    public void updateStatus(OrderStatus status) {
-        this.status = status;
-        this.updatedAt = LocalDateTime.now();
-    }
-
     // 주문 취소 메서드
     public void cancel(String cancelReason) {
         this.status = OrderStatus.CANCELLED;
         this.cancelReason = cancelReason;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // 상태 전이 정책을 캡슐화한 메서드 (허용된 전이만 가능)
+    public void changeStatus(OrderStatus target) {
+
+        if (target == null) {
+            throw new CustomException(ErrorCode.INVALID_INPUT);
+        }
+
+        if (this.status == OrderStatus.CANCELLED
+                || this.status == OrderStatus.DELIVERED) {
+            throw new CustomException(ErrorCode.ORDER_INVALID_STATUS);
+        }
+
+        boolean valid =
+                (this.status == OrderStatus.PREPARING && target == OrderStatus.SHIPPING) ||
+                        (this.status == OrderStatus.SHIPPING && target == OrderStatus.DELIVERED);
+
+        if (!valid) {
+            throw new CustomException(ErrorCode.ORDER_INVALID_STATUS);
+        }
+
+        this.status = target;
         this.updatedAt = LocalDateTime.now();
     }
 }
