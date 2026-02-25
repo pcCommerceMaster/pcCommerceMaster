@@ -79,7 +79,7 @@ public class Order {
 
         if (this.status == OrderStatus.CANCELLED
                 || this.status == OrderStatus.DELIVERED) {
-            throw new CustomException(ErrorCode.ORDER_INVALID_STATUS);
+            throw new CustomException(ErrorCode.ORDER_INVALID_STATUS); // ErrorCode.Java에 빠진 부분 추가
         }
 
         boolean valid =

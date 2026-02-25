@@ -108,8 +108,8 @@ public class ProductService {
     public ProductDetailResponse getProductDetail(Long productId) {
         Product product = productRepository.findWithAdminByIdAndDeletedAtIsNull(productId)
                 .orElseThrow(
-                () -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND)
-        );
+                        () -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND)
+                );
         return new ProductDetailResponse(product);
     }
 
