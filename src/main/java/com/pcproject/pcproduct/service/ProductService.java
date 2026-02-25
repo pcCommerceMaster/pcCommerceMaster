@@ -153,7 +153,7 @@ public class ProductService {
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
         if (product.getStatus() == ProductStatus.DISCONTINUED) {
-            throw new CustomException(ErrorCode.PRODUCT_DISCONTINUED_CONFLICT);
+            throw new CustomException(ErrorCode.PRODUCT_DISCONTINUED);
         }
 
         if (request.getType() == StockChangeType.INCREASE) {
@@ -180,7 +180,7 @@ public class ProductService {
 
         // DISCONTINUED 상태 변경 불가
         if (current == ProductStatus.DISCONTINUED) {
-            throw new CustomException(ErrorCode.PRODUCT_DISCONTINUED_CONFLICT);
+            throw new CustomException(ErrorCode.PRODUCT_DISCONTINUED);
         }
         // stock=0 일때 ON_SALE 불가
         if (next == ProductStatus.ON_SALE && product.getStock() <= 0) {
