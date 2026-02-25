@@ -124,7 +124,7 @@ public class OrderService {
         adminRepository.findById(loginAdmin.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.ADMIN_NOT_FOUND));
 
-        // 주문 조회(공통 에러 코드로 변경함)
+        // 주문 존재 여부 검증
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
@@ -138,14 +138,13 @@ public class OrderService {
         );
     }
 
-
-
     // 주문 취소(PATCH)
     @Transactional
     public CancelOrderResponse cancelOrder(Long orderId, CancelOrderRequest request) {
 
-        // 1) 주문 조회(추후 공통 에러 코드로 변경 예정)
+        // 주문 존재 여부 검증
         Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
                 //.orElseThrow(() -> new IllegalStateException("ORDER_NOT_FOUND"));
         .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
@@ -155,15 +154,12 @@ public class OrderService {
             throw new CustomException(ErrorCode.ORDER_CANCEL_NOT_ALLOWED);
         }
 
-        // 3) 취소 사유 저장 + 상태 변경
+        // 취소 사유 검증 및 저장, 상태 변경은 도메인 정책에 따라 엔티티에서 처리
         order.cancel(request.getCancelReason());
 
-        // 4) TODO: 재고 복구 처리(추후 구현 예정)
-        // - 주문 수량만큼 product.stock += quantity
-        // - product.status 자동 전환 (단, DISCONTINUED면 상태 유지)
-
-        // 5) 저장
-        orderRepository.save(order);
+        // 취소된 주문 수량만큼 상품 재고 복구 (상품 도메인 정책 적용)
+        Product product = order.getProduct();
+        product.restoreStock(order.getQuantity());
 
         return new CancelOrderResponse(
                 order.getId(),

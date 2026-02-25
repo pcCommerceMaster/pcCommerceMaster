@@ -8,12 +8,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/**
- * Created by IntelliJ IDEA.
- * User: jeongjihun
- * Date: 26. 2. 20.
- * Time: 오후 8:07
- **/
 
 @Getter
 @NoArgsConstructor

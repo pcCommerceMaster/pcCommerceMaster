@@ -69,12 +69,6 @@ public class Order {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // 주문 취소 메서드
-    public void cancel(String cancelReason) {
-        this.status = OrderStatus.CANCELLED;
-        this.cancelReason = cancelReason;
-        this.updatedAt = LocalDateTime.now();
-    }
 
     // 상태 전이 정책을 캡슐화한 메서드 (허용된 전이만 가능)
     public void changeStatus(OrderStatus target) {
@@ -99,4 +93,23 @@ public class Order {
         this.status = target;
         this.updatedAt = LocalDateTime.now();
     }
+
+    // 주문 취소 정책 수행 (사유 검증 + PREPARING 상태만 허용)
+    public void cancel(String cancelReason) {
+
+        // 취소 사유는 필수 (도메인 무결성 보장)
+        if (cancelReason == null || cancelReason.isBlank()) {
+            throw new CustomException(ErrorCode.INVALID_INPUT);
+        }
+
+        // 취소는 PREPARING 상태에서만 가능
+        if (this.status != OrderStatus.PREPARING) {
+            throw new CustomException(ErrorCode.ORDER_CANCEL_NOT_ALLOWED);
+        }
+
+        this.status = OrderStatus.CANCELLED;
+        this.cancelReason = cancelReason;
+        this.updatedAt = LocalDateTime.now();
+    }
+
 }
