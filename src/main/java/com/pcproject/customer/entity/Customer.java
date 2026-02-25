@@ -38,7 +38,7 @@ public class Customer {
     private LocalDateTime deletedAt;
 
     // orederEntity 임의 설정와 customerEntity 연결해야함. ********
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true) // 하드 딜리트임 이건 좀 위험함
     private List<Order> orders = new ArrayList<>();
 
     // 비즈니스 메서드 (정보 수정)

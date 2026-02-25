@@ -9,7 +9,7 @@ VALUES ('슈퍼관리자', 'admin@sparta.com', '$2a$10$GNOwjOt92uirodEUA.Yuw.wUM
         'SUPER_ADMIN', 'ACTIVE', '2025-01-01 09:00:00', '2025-01-01 09:00:00'),
        ('김운영', 'operation@sparta.com', '$2a$10$GNOwjOt92uirodEUA.Yuw.wUM1JQtO9YxG2hHRnUoLkfDC7jcHwSC', '010-1111-1111',
         'OPERATION_ADMIN', 'ACTIVE', '2025-01-05 10:00:00', '2025-01-06 09:00:00'),
-       ('이고객', 'cs@sparta.com', '$2a$10$GNOwjOt92uirodEUA.Yuw.wUM1JQtO9YxG2hHRnUoLkfDC7jcHwSC', '010-2222-2222',
+       ('이고객', 'cs@sparta.com', '$2a$10$aHdqydCdtZ1YJiujmVirJu2nOGmALbftI6XDTlr2NX8PLPA85CKKO', '010-2222-2222',
         'CS_ADMIN', 'ACTIVE', '2025-01-07 10:00:00', '2025-01-08 09:00:00'),
        ('박대기', 'pending@sparta.com', '$2a$10$GNOwjOt92uirodEUA.Yuw.wUM1JQtO9YxG2hHRnUoLkfDC7jcHwSC', '010-3333-3333',
         'CS_ADMIN', 'PENDING', '2025-02-01 10:00:00', NULL),
