@@ -67,6 +67,22 @@ public class Product {
         this.syncStatusByStock();
     }
 
+
+    // 재고 상태 검증
+    public void validateOrderable() {
+
+        // 상품 삭제 여부 검증
+        if (this.isDeleted()) {
+            throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+
+        // 판매 상태가 ON_SALE인지 확인
+        if (this.status != ProductStatus.ON_SALE) {
+            throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
+        }
+    }
+
+    // 재고 검증과 차감 메서드
     // 상품 정보 수정
     public void updateInfo(String productName,
                            ProductCategory category,
@@ -87,11 +103,22 @@ public class Product {
     public void decreaseStock(int quantity) {
         if (this.stock < quantity) {
             throw new CustomException(ErrorCode.PRODUCT_STOCK_INSUFFICIENT);
-        }
+  // ========================임시 주석처리[20260225 / 2:42] 재고감소 검토 재필요====================
+         public void decreaseStock(int quantity) {
+        if (this.stock < quantity) {
+             throw new CustomException(ErrorCode.PRODUCT_SOLD_OUT);
+       }
         this.stock -= quantity;
+
+        // 재고가 0이 되면 자동으로 SOLD_OUT 전환
+        if (this.stock == 0 && this.status == ProductStatus.ON_SALE) {
+            this.status = ProductStatus.SOLD_OUT;
+        }
+
+        this.updatedAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
-
+///=================================================================================================
     // 상태 변경
     public void changeStatus(ProductStatus status) {
         this.status = status;

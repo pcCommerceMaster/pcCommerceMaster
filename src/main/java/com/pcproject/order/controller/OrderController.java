@@ -1,7 +1,10 @@
 package com.pcproject.order.controller;
 
+import com.pcproject.admin.controller.SessionConst;
+import com.pcproject.admin.dto.LoginAdmin;
 import com.pcproject.order.dto.*;
 import com.pcproject.order.service.OrderService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +22,16 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    // 주문 생성(POST)
+    // 주문 생성 (세션 기반 관리자 인증)
     @PostMapping
-    public ResponseEntity<CreateOrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
-        CreateOrderResponse result = orderService.createOrder(request);
+    public ResponseEntity<CreateOrderResponse> createOrder(
+            @Valid @RequestBody CreateOrderRequest request,
+            HttpSession session) {
+
+        LoginAdmin loginAdmin =
+                (LoginAdmin) session.getAttribute(SessionConst.LOGIN_ADMIN);
+
+        CreateOrderResponse result = orderService.createOrder(request, loginAdmin);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
