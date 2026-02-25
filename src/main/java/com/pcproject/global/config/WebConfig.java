@@ -18,11 +18,6 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
 
         registry.addInterceptor(adminAuthInterceptor)
-                // 주문 생성
-                .addPathPatterns("/api/orders")
-                // 상태 변경
-                .addPathPatterns("/api/orders/*/status")
-                // 주문 취소
-                .addPathPatterns("/api/orders/*/cancel");
+                .addPathPatterns("/api/orders/**");
     }
 }
