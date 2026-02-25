@@ -65,15 +65,19 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.success("주문 취소 완료", orderService.cancelOrder(orderId, request, admin)));
     }
 
-
-
     @GetMapping
-    public ResponseEntity<ApiResponse<OrderListResponse>> getOrders(@ModelAttribute @Valid OrderSearchRequest request) {
+    public ResponseEntity<ApiResponse<OrderListResponse>> getOrders(
+            @ModelAttribute @Valid OrderSearchRequest request,
+            HttpServletRequest httpRequest) {
+        extractAdmin(httpRequest);
         return ResponseEntity.ok(ApiResponse.success("주문 목록 조회 성공", orderService.getOrders(request)));
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<ApiResponse<OrderDetailResponse>> getOrder(@PathVariable Long orderId) {
+    public ResponseEntity<ApiResponse<OrderDetailResponse>> getOrder(
+            @PathVariable Long orderId,
+            HttpServletRequest httpRequest) {
+        extractAdmin(httpRequest);
         return ResponseEntity.ok(ApiResponse.success("주문 상세 조회 성공", orderService.getOrder(orderId)));
     }
 }
