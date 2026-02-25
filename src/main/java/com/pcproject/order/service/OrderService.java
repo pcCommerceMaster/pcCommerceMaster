@@ -10,6 +10,7 @@ import com.pcproject.order.entity.OrderStatus;
 import com.pcproject.order.repository.OrderRepository;
 import com.pcproject.order.repository.OrderSpecification;
 import com.pcproject.pcproduct.entity.Product;
+import com.pcproject.pcproduct.entity.ProductStatus;
 import com.pcproject.pcproduct.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -42,6 +43,29 @@ public class OrderService {
         // 상품 id 검증 및 공통 에러 처리
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // DTO와 함께 quantity 중복 체크(혹시 모를 우회 완전 차단)
+        if (request.getQuantity() < 1) {
+            throw new CustomException(ErrorCode.ORDER_QUANTITY_INVALID);
+        }
+
+        // 상품 삭제 여부 검증
+        if (product.getDeletedAt() != null) {
+            throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+
+        // 판매 상태가 ON_SALE인지 확인
+        if (product.getStatus() != ProductStatus.ON_SALE) {
+            throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
+        }
+
+        //
+        if (product.getStock() < request.getQuantity()) {
+            throw new CustomException(ErrorCode.PRODUCT_STOCK_INSUFFICIENT);
+        }
+
+        // 재고가 있는지 검증 후 차감
+        product.decreaseStock(request.getQuantity());
 
         // 주문번호(임시) ORD-생성시간-랜덤
         String orderNumber =

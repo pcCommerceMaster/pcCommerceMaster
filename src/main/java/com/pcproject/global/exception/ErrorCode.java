@@ -30,14 +30,16 @@ public enum ErrorCode {
 
     // 상품
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 상품입니다."),
-    PRODUCT_DISCONTINUED(HttpStatus.BAD_REQUEST, "단종된 상품입니다."),
-    PRODUCT_SOLD_OUT(HttpStatus.BAD_REQUEST, "품절된 상품입니다."),
-    PRODUCT_STOCK_INSUFFICIENT(HttpStatus.BAD_REQUEST, "재고가 부족합니다."),
+    PRODUCT_DISCONTINUED(HttpStatus.CONFLICT, "단종된 상품입니다."),
+    PRODUCT_SOLD_OUT(HttpStatus.CONFLICT, "품절된 상품입니다."),
+    PRODUCT_STOCK_INSUFFICIENT(HttpStatus.CONFLICT, "재고가 부족합니다."),
+    PRODUCT_NOT_ON_SALE(HttpStatus.CONFLICT, "판매 중인 상품이 아닙니다."),
 
     // 주문
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 주문입니다."),
-    ORDER_CANCEL_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "준비중 상태의 주문만 취소할 수 있습니다."),
-    ORDER_QUANTITY_INVALID(HttpStatus.BAD_REQUEST, "수량은 1 이상이어야 합니다.");
+    ORDER_CANCEL_NOT_ALLOWED(HttpStatus.CONFLICT, "준비중 상태의 주문만 취소할 수 있습니다."),
+    ORDER_QUANTITY_INVALID(HttpStatus.BAD_REQUEST, "수량은 1 이상이어야 합니다."),
+    ORDER_INVALID_STATUS(HttpStatus.CONFLICT, "현재 주문 상태에서는 수행할 수 없습니다.");
 
     private final HttpStatus status;
     private final String message;

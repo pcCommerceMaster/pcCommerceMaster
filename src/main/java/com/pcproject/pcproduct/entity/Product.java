@@ -1,7 +1,11 @@
 package com.pcproject.pcproduct.entity;
 
 import com.pcproject.admin.entity.Admin;
+import com.pcproject.global.exception.CustomException;
+import com.pcproject.global.exception.ErrorCode;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -69,5 +73,13 @@ public class Product {
     }
     public boolean isDeleted() {
         return deletedAt != null;
+    }
+
+    // 재고 검증과 차감 메서드
+    public void decreaseStock(int quantity) {
+        if (this.stock < quantity) {
+            throw new CustomException(ErrorCode.PRODUCT_STOCK_INSUFFICIENT);
+        }
+        this.stock -= quantity;
     }
 }
