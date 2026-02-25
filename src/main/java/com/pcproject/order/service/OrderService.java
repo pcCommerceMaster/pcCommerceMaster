@@ -2,8 +2,6 @@ package com.pcproject.order.service;
 
 import com.pcproject.admin.dto.LoginAdmin;
 import com.pcproject.admin.entity.Admin;
-import com.pcproject.admin.entity.AdminRole;
-import com.pcproject.admin.repository.AdminRepository;
 import com.pcproject.customer.entity.Customer;
 import com.pcproject.customer.repository.CustomerRepository;
 import com.pcproject.order.dto.*;
@@ -33,39 +31,13 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
-    private final AdminRepository adminRepository;
 
-    // CS 담당 관리자 인증 및 인가 검증 후 Admin 반환
-    private Admin validateCsAdmin(LoginAdmin loginAdmin) {
-
-        // 세션 로그인 검증
-        if (loginAdmin == null) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED);
-        }
-
-        // 권한 검증(CS_ADMIN)
-        if (loginAdmin.getRole() != AdminRole.CS_ADMIN) {
-            throw new CustomException(ErrorCode.FORBIDDEN);
-        }
-
-        // Admin 조회
-        return adminRepository.findById(loginAdmin.getId())
-                .orElseThrow(() -> new CustomException(ErrorCode.ADMIN_NOT_FOUND));
-    }
 
     // 주문 생성(POST)
     @Transactional
     public CreateOrderResponse createOrder(
             CreateOrderRequest request,
-            LoginAdmin loginAdmin) {
-
-        // CS 담당 관리자 검증
-        Admin admin = validateCsAdmin(loginAdmin);
-
-        // DTO와 함께 quantity 중복 체크(혹시 모를 우회 완전 차단)
-        if (request.getQuantity() < 1) {
-            throw new CustomException(ErrorCode.ORDER_QUANTITY_INVALID);
-        }
+            Admin admin) {
 
         // 고객 조회
         Customer customer = customerRepository.findById(request.getCustomerId())
@@ -75,7 +47,8 @@ public class OrderService {
         Product product = productRepository.findByIdForUpdate(request.getProductId())
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        // 재고가 상태 검증 후 차감
+        // 판매 가능 상태 및 삭제 여부 검증
+        // 재고 부족 여부를 도메인 내부에서 검증 후 차감
         product.validateOrderable();
         product.decreaseStock(request.getQuantity());
 
@@ -116,9 +89,7 @@ public class OrderService {
     public UpdateOrderResponse updateOrderStatus(
             Long orderId,
             UpdateOrderRequest request,
-            LoginAdmin loginAdmin) {
-
-        validateCsAdmin(loginAdmin);
+            Admin admin) {
 
         // 주문 존재 여부 검증
         Order order = orderRepository.findById(orderId)
@@ -139,9 +110,7 @@ public class OrderService {
     public CancelOrderResponse cancelOrder(
             Long orderId,
             CancelOrderRequest request,
-            LoginAdmin loginAdmin) {
-
-        validateCsAdmin(loginAdmin);
+            Admin admin) {
 
         // 주문 존재 여부 검증
         Order order = orderRepository.findById(orderId)
