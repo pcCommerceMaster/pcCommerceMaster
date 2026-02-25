@@ -1,6 +1,5 @@
 package com.pcproject.pcproduct.dto;
 
-import com.pcproject.pcproduct.entity.Product;
 import lombok.Getter;
 
 import java.util.List;
@@ -15,9 +14,8 @@ public class ProductListResponseWrapper {
                                       int pageSize,
                                       long totalCount,
                                       int totalPages) {
-    this.content = content;
-    this.pageInfo = new PageInfo(currentPage,
-            pageSize, totalCount,totalPages);
+        this.content = content;
+        this.pageInfo = new PageInfo(currentPage, pageSize, totalCount, totalPages);
     }
 
     @Getter

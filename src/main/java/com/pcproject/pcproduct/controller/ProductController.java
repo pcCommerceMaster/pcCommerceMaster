@@ -96,4 +96,28 @@ public class ProductController {
                 ApiResponse.success("상품 상태 변경 완료", response)
         );
     }
+
+    // 상품 삭제
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<ApiResponse<Void>> deleteProduct(
+            @PathVariable Long productId
+    ) {
+        productService.deleteProduct(productId);
+        return ResponseEntity.ok(
+                ApiResponse.success("상품 삭제 완료", null)
+        );
+    }
+
+    // 상품 복구
+    @PatchMapping("/{productId}/restore")
+    public ResponseEntity<ApiResponse<ProductStatusUpdateResponse>> restoreProduct(
+            @PathVariable Long productId
+    ) {
+        ProductStatusUpdateResponse response =
+                productService.restoreProduct(productId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("상품 복구 완료", response)
+        );
+    }
 }

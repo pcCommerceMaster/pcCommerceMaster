@@ -63,14 +63,8 @@ public class Product {
         this.status = status;
         this.admin = admin;
         this.createdAt = LocalDateTime.now();
-    }
-
-    // soft delete
-    public void softDelete() {
-        this.deletedAt = LocalDateTime.now();
-    }
-    public boolean isDeleted() {
-        return deletedAt != null;
+        // 등록시 상태 자동 동기화
+        this.syncStatusByStock();
     }
 
 
@@ -106,12 +100,15 @@ public class Product {
     }
 
     // 재고 감소
-  // 임시 주석처리[20260225 / 2:42]
-//    public void decreaseStock(int quantity) {
-//         if (this.stock < quantity) {
-//             throw new CustomException(ErrorCode.PRODUCT_SOLD_OUT);
-//         }
-//         this.stock -= quantity;
+    public void decreaseStock(int quantity) {
+        if (this.stock < quantity) {
+            throw new CustomException(ErrorCode.PRODUCT_STOCK_INSUFFICIENT);
+  // ========================임시 주석처리[20260225 / 2:42] 재고감소 검토 재필요====================
+         public void decreaseStock(int quantity) {
+        if (this.stock < quantity) {
+             throw new CustomException(ErrorCode.PRODUCT_SOLD_OUT);
+       }
+        this.stock -= quantity;
 
         // 재고가 0이 되면 자동으로 SOLD_OUT 전환
         if (this.stock == 0 && this.status == ProductStatus.ON_SALE) {
@@ -121,7 +118,7 @@ public class Product {
         this.updatedAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
-
+///=================================================================================================
     // 상태 변경
     public void changeStatus(ProductStatus status) {
         this.status = status;
@@ -139,5 +136,19 @@ public class Product {
         } else {
             this.status = ProductStatus.ON_SALE;
         }
+    }
+
+    // soft delete
+    public void softDelete() {
+        this.deletedAt = LocalDateTime.now();
+    }
+    // 복구
+    public void restore() {
+        this.deletedAt = null;
+        this.updatedAt = LocalDateTime.now();
+    }
+    // 삭제 여부
+    public boolean isDeleted() {
+        return deletedAt != null;
     }
 }
