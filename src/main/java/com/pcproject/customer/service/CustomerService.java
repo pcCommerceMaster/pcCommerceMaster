@@ -1,8 +1,8 @@
 package com.pcproject.customer.service;
 
 
-import com.pc_commerce_master.global.exception.CustomException;
-import com.pc_commerce_master.global.exception.ErrorCode;
+import com.pcproject.global.exception.CustomException;
+import com.pcproject.global.exception.ErrorCode;
 import com.pcproject.customer.dto.*;
 import com.pcproject.customer.entity.Customer;
 import com.pcproject.customer.entity.CustomerStatus;
@@ -25,8 +25,9 @@ public class CustomerService {
 
     // 리스트 조회
     public GetCustomerListResponse getCustomers(String keyword, Pageable pageable) {
-        Page<Customer> page = customerRepository.
-                findByNameContainingAndDeletedAtIsNullOrEmailContainingAndDeletedAtIsNull(keyword, keyword, pageable);
+        Page<Customer> page =
+                //customerRepository.findByNameContainingAndDeletedAtIsNullOrEmailContainingAndDeletedAtIsNull(keyword, keyword, pageable);
+                customerRepository.searchByKeyword(keyword, pageable);
         // 이름과 email로 검색하되 삭제되지 않은 정보만 탐색
 
         List<GetCustomerResponse> customers = page.getContent().stream()
