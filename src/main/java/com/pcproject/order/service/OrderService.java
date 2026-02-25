@@ -15,6 +15,9 @@ import com.pcproject.order.repository.OrderRepository;
 import com.pcproject.order.repository.OrderSpecification;
 import com.pcproject.pcproduct.entity.Product;
 import com.pcproject.pcproduct.repository.ProductRepository;
+import jakarta.validation.Valid;
+import com.pcproject.pcproduct.entity.ProductStatus;
+import com.pcproject.pcproduct.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -84,6 +87,12 @@ public class OrderService {
                 "ORD-" + System.currentTimeMillis()
                 + "-" + UUID.randomUUID().toString().substring(0, 4);
 
+        // 상품 가격(임시)
+        //Long unitPrice = 10000L;
+        Customer customer = customerRepository.findById(request.getCustomerId())
+                .orElseThrow(() -> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
         // 상품 가격 스냅샷
         Long unitPrice = product.getPrice();
 
@@ -146,6 +155,14 @@ public class OrderService {
         // 주문 존재 여부 검증
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+                //.orElseThrow(() -> new IllegalStateException("ORDER_NOT_FOUND"));
+        .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 2) PREPARING만 취소 가능(추후 공통 에러 코드로 변경 예정)
+        if (order.getStatus() != OrderStatus.PREPARING) {
+            //throw new IllegalStateException("ORDER_CANCEL_NOT_ALLOWED");
+            throw new CustomException(ErrorCode.ORDER_CANCEL_NOT_ALLOWED);
+        }
 
         // 주문 취소 정책은 Order 도메인에서 처리
         order.cancel(request.getCancelReason());
