@@ -20,10 +20,10 @@ import lombok.NoArgsConstructor;
 public class CreateOrderRequest {
 
     @NotNull
-    private Customer customerId;
+    private Long customerId;
 
     @NotNull
-    private Product productId;
+    private Long productId;
 
     @NotNull
     @Min(1)

@@ -1,6 +1,6 @@
 package com.pcproject.admin.service;
 
-import com.pcproject.admin.config.PasswordEncoder;
+import com.pcproject.config.PasswordEncoder;
 import com.pcproject.admin.dto.ChangePasswordRequest;
 import com.pcproject.admin.dto.MeResponse;
 import com.pcproject.admin.dto.MeUpdateRequest;

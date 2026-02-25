@@ -1,4 +1,4 @@
-package com.pcproject.admin.config;
+package com.pcproject.config;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Component;

@@ -26,14 +26,14 @@ public class OrderDetailResponse {
                 order.getOrderNumber(),
                 order.getCustomer().getName(),
                 order.getCustomer().getEmail(),
-                order.getProduct().getName(),
+                order.getProduct().getProductName(),
                 order.getQuantity(),
                 order.getTotalAmount(),
                 order.getCreatedAt(),
                 order.getStatus(),
                 order.getAdmin() != null ? order.getAdmin().getName() : null,
                 order.getAdmin() != null ? order.getAdmin().getEmail() : null,
-                order.getAdmin() != null ? order.getAdmin().getRole() : null
+                order.getAdmin() != null ? order.getAdmin().getRole().name() : null
         );
     }
 }

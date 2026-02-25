@@ -4,7 +4,7 @@ package com.pcproject.customer.service;
 import com.pc_commerce_master.global.exception.CustomException;
 import com.pc_commerce_master.global.exception.ErrorCode;
 import com.pcproject.customer.dto.*;
-import com.pcproject.customer.entity.CustomerEntity;
+import com.pcproject.customer.entity.Customer;
 import com.pcproject.customer.entity.CustomerStatus;
 import com.pcproject.customer.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ public class CustomerService {
 
     // 리스트 조회
     public GetCustomerListResponse getCustomers(String keyword, Pageable pageable) {
-        Page<CustomerEntity> page = customerRepository.
+        Page<Customer> page = customerRepository.
                 findByNameContainingAndDeletedAtIsNullOrEmailContainingAndDeletedAtIsNull(keyword, keyword, pageable);
         // 이름과 email로 검색하되 삭제되지 않은 정보만 탐색
 
@@ -47,7 +47,7 @@ public class CustomerService {
 
     // 상세 조회
     public GetCustomerResponse getCustomer(Long id) {
-        CustomerEntity customer = findById(id);
+        Customer customer = findById(id);
         return new GetCustomerResponse(
                 customer.getId(),
                 customer.getName(),
@@ -58,7 +58,7 @@ public class CustomerService {
     }
 
     // 고객이 존재하지 않을 때 예외 처리
-    private CustomerEntity findById(Long id) {
+    private Customer findById(Long id) {
         return customerRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
     }
@@ -66,7 +66,7 @@ public class CustomerService {
     // 정보 수정
     @Transactional
     public UpdateCustomerInfoResponse updateInfo(Long id, UpdateCustomerInfoRequest request) {
-        CustomerEntity customer = findById(id);
+        Customer customer = findById(id);
 
         if (!customer.getEmail().equals(request.getEmail()) &&
                 customerRepository.existsByEmailAndDeletedAtIsNull(request.getEmail())) {
@@ -85,7 +85,7 @@ public class CustomerService {
     // 상태 변경
     @Transactional
     public UpdateCustomerStatusResponse updateStatus(Long id, UpdateCustomerStatusRequest request) {
-        CustomerEntity customer = findById(id);
+        Customer customer = findById(id);
 
         //
         try {
@@ -103,7 +103,7 @@ public class CustomerService {
     @Transactional
     public void deleteCustomer(Long id) {
         // 레포지토리에서 미삭제 고객 검색
-        CustomerEntity customer = customerRepository.findByIdAndDeletedAtIsNull(id)
+        Customer customer = customerRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
 
         customer.softDelete();

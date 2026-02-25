@@ -4,8 +4,6 @@ import com.pcproject.admin.entity.Admin;
 import com.pcproject.customer.entity.Customer;
 import com.pcproject.pcproduct.entity.Product;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -56,8 +54,6 @@ public class Order {
 
     private LocalDateTime updatedAt;
 
-    private LocalDateTime deletedAt;
-
     public Order(String orderNumber, Customer customer, Product product, Admin admin, Integer quantity, Long unitPrice, OrderStatus status) {
         this.orderNumber = orderNumber;
         this.customer = customer;
@@ -71,8 +67,16 @@ public class Order {
         this.updatedAt = LocalDateTime.now();
     }
 
+    // 주문 상태 변경 메서드
     public void updateStatus(OrderStatus status) {
         this.status = status;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // 주문 취소 메서드
+    public void cancel(String cancelReason) {
+        this.status = OrderStatus.CANCELLED;
+        this.cancelReason = cancelReason;
         this.updatedAt = LocalDateTime.now();
     }
 }

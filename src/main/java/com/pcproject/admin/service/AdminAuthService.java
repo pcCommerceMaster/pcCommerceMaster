@@ -1,6 +1,6 @@
 package com.pcproject.admin.service;
 
-import com.pcproject.admin.config.PasswordEncoder;
+import com.pcproject.config.PasswordEncoder;
 import com.pcproject.admin.dto.AdminLoginRequest;
 import com.pcproject.admin.dto.AdminSignupRequest;
 import com.pcproject.admin.dto.AdminSignupResponse;
