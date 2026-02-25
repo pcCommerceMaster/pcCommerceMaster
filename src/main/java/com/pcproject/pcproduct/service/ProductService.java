@@ -53,8 +53,6 @@ public class ProductService {
         String sortBy = request.getSortBy();
         String direction = request.getDirection();
         String keyword = request.getKeyword();
-        String category = request.getCategory();
-        String status = request.getStatus();
 
         // 정렬 기준 검증
         if (!sortBy.equals("price") && !sortBy.equals("stock") && !sortBy.equals("createdAt")) {
@@ -62,21 +60,6 @@ public class ProductService {
         }
         // 정렬 검증
         if (!direction.equals("asc") && !direction.equals("desc")) {
-            throw new CustomException(ErrorCode.INVALID_INPUT);
-        }
-        // Enum 변환 처리(enum 오류 -> 400 대응)
-        final ProductCategory categoryEnum;
-        final ProductStatus statusEnum;
-        try {
-            categoryEnum = (category != null)
-                    ? ProductCategory.valueOf(category)
-                    : null;
-
-            statusEnum = (status != null)
-                    ? ProductStatus.valueOf(status)
-                    : null;
-
-        } catch (IllegalArgumentException e) {
             throw new CustomException(ErrorCode.INVALID_INPUT);
         }
 
@@ -110,14 +93,14 @@ public class ProductService {
                     '\\'));
         }
         // 카테고리 필터
-        if (category != null) {
+        if (request.getCategory() != null) {
             spec = spec.and((root, query, cb)
-                    -> cb.equal(root.get("category"), categoryEnum));
+                    -> cb.equal(root.get("category"), request.getCategory()));
         }
         // 상태 필터
-        if (status != null) {
+        if (request.getStatus() != null) {
             spec = spec.and((root, query, cb)
-                    -> cb.equal(root.get("status"), statusEnum));
+                    -> cb.equal(root.get("status"), request.getStatus()));
         }
         Page<Product> productPage =
                 productRepository.findAll(spec, pageable);

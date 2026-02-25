@@ -63,6 +63,8 @@ public class Product {
         this.status = status;
         this.admin = admin;
         this.createdAt = LocalDateTime.now();
+        // 등록시 상태 자동 동기화
+        this.syncStatusByStock();
     }
 
     // 상품 정보 수정

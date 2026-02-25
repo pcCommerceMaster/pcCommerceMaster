@@ -1,5 +1,7 @@
 package com.pcproject.pcproduct.dto;
 
+import com.pcproject.pcproduct.entity.ProductCategory;
+import com.pcproject.pcproduct.entity.ProductStatus;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.Getter;
@@ -17,6 +19,6 @@ public class ProductSearchRequest {
     private Integer size = 10;
     private String sortBy = "createdAt";
     private String direction = "desc";
-    private String category;
-    private String status;
+    private ProductCategory category;
+    private ProductStatus status;
 }
