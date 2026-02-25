@@ -6,7 +6,6 @@ import com.pcproject.admin.entity.Admin;
 import com.pcproject.admin.repository.AdminRepository;
 import com.pcproject.pcproduct.dto.*;
 import com.pcproject.pcproduct.entity.Product;
-import com.pcproject.pcproduct.entity.ProductCategory;
 import com.pcproject.pcproduct.entity.ProductStatus;
 import com.pcproject.pcproduct.entity.StockChangeType;
 import com.pcproject.pcproduct.repository.ProductRepository;
@@ -50,27 +49,16 @@ public class ProductService {
 
         int page = request.getPage();
         int size = request.getSize();
-        String sortBy = request.getSortBy();
-        String direction = request.getDirection();
         String keyword = request.getKeyword();
 
-        // 정렬 기준 검증
-        if (!sortBy.equals("price") && !sortBy.equals("stock") && !sortBy.equals("createdAt")) {
-            throw new CustomException(ErrorCode.INVALID_INPUT);
-        }
-        // 정렬 검증
-        if (!direction.equals("asc") && !direction.equals("desc")) {
-            throw new CustomException(ErrorCode.INVALID_INPUT);
-        }
-
         // 정렬 설정
-        Sort sort = direction.equalsIgnoreCase("asc")
-                ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
+        Sort sort = request.getDirection() == Sort.Direction.ASC
+                ? Sort.by(request.getSortBy().getField()).ascending()
+                : Sort.by(request.getSortBy().getField()).descending();
         Pageable pageable = PageRequest.of(page -1, size, sort);
 
         // 기본 조건 - 삭제 되지 않은 상품만
-        Specification<Product> spec = (root, query, cb) -> {
+        Specification<Product> spec = Specification.where((root, query, cb) -> {
 
             if (!Long.class.equals(query.getResultType())) {
                 root.fetch("admin", JoinType.INNER);
@@ -78,7 +66,7 @@ public class ProductService {
             }
 
             return cb.isNull(root.get("deletedAt"));
-        };
+        });
         //키워드 검색
         if (keyword != null && !keyword.isBlank()) {
 
@@ -162,7 +150,6 @@ public class ProductService {
             product.decreaseStock(request.getQuantity());
         }
 
-        product.syncStatusByStock();
         return new ProductStockUpdateResponse(product);
     }
 
@@ -221,7 +208,6 @@ public class ProductService {
             throw new CustomException(ErrorCode.PRODUCT_NOT_DELETED);
         }
         product.restore();
-        product.syncStatusByStock();
 
         return new ProductStatusUpdateResponse(product);
     }
