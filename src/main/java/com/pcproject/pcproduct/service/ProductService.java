@@ -8,7 +8,9 @@ import com.pcproject.pcproduct.dto.*;
 import com.pcproject.pcproduct.entity.Product;
 import com.pcproject.pcproduct.entity.ProductCategory;
 import com.pcproject.pcproduct.entity.ProductStatus;
+import com.pcproject.pcproduct.entity.StockChangeType;
 import com.pcproject.pcproduct.repository.ProductRepository;
+import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,7 +44,7 @@ public class ProductService {
         return new ProductCreateResponse(savedProduct);
     }
 
-    // 상풀 리스트 조회
+    // 상품 리스트 조회
     @Transactional(readOnly = true)
     public ProductListResponseWrapper getProducts(ProductSearchRequest request) {
 
@@ -54,14 +56,6 @@ public class ProductService {
         String category = request.getCategory();
         String status = request.getStatus();
 
-        // 페이지 검증
-        if (page < 1) {
-            throw new CustomException(ErrorCode.INVALID_INPUT);
-        }
-        // 사이즈 검증
-        if (size < 1 || size > 100) {
-            throw new CustomException(ErrorCode.INVALID_INPUT);
-        }
         // 정렬 기준 검증
         if (!sortBy.equals("price") && !sortBy.equals("stock") && !sortBy.equals("createdAt")) {
             throw new CustomException(ErrorCode.INVALID_INPUT);
@@ -93,13 +87,27 @@ public class ProductService {
         Pageable pageable = PageRequest.of(page -1, size, sort);
 
         // 기본 조건 - 삭제 되지 않은 상품만
-        Specification<Product> spec =
-                (root, query, cb)
-                        -> cb.isNull(root.get("deletedAt"));
+        Specification<Product> spec = (root, query, cb) -> {
+
+            if (!Long.class.equals(query.getResultType())) {
+                root.fetch("admin", JoinType.INNER);
+                query.distinct(true);
+            }
+
+            return cb.isNull(root.get("deletedAt"));
+        };
         //키워드 검색
         if (keyword != null && !keyword.isBlank()) {
+
+            String safeKeyword = keyword
+                    .replace("\\", "\\\\")
+                    .replace("%", "\\%")
+                    .replace("_", "\\_");
+
             spec = spec.and((root, query, cb)
-                    -> cb.like(root.get("productName"), "%" + keyword + "%"));
+                    -> cb.like(root.get("productName"),
+                    "%" + safeKeyword + "%",
+                    '\\'));
         }
         // 카테고리 필터
         if (category != null) {
@@ -117,8 +125,8 @@ public class ProductService {
         return new ProductListResponseWrapper(
                 productPage.getContent().stream()
                         .map(ProductListResponse::new).toList(),
-                page,
-                size,
+                productPage.getNumber() + 1,
+                productPage.getSize(),
                 productPage.getTotalElements(),
                 productPage.getTotalPages()
         );
@@ -127,10 +135,66 @@ public class ProductService {
     // 상품 상세 조회
     @Transactional(readOnly = true)
     public ProductDetailResponse getProductDetail(Long productId) {
-        Product product = productRepository.findByIdAndDeletedAtIsNull(productId)
+        Product product = productRepository.findWithAdminByIdAndDeletedAtIsNull(productId)
                 .orElseThrow(
                 () -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND)
         );
         return new ProductDetailResponse(product);
+    }
+
+    // 상품 정보 수정
+    @Transactional
+    public ProductUpdateResponse updateProduct(Long productId,
+                                               ProductUpdateRequest request) {
+
+        Product product = productRepository
+                .findByIdAndDeletedAtIsNull(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        product.updateInfo(
+                request.getProductName(),
+                request.getCategory(),
+                request.getPrice()
+        );
+
+        return new ProductUpdateResponse(product);
+    }
+
+    // 상품 재고 변경
+    @Transactional
+    public ProductStockUpdateResponse updateStock(Long productId,
+                                                  ProductStockUpdateRequest request) {
+
+        Product product = productRepository
+                .findWithLockByIdAndDeletedAtIsNull(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        if (request.getType() == StockChangeType.INCREASE) {
+            product.increaseStock(request.getQuantity());
+        } else {
+            product.decreaseStock(request.getQuantity());
+        }
+        // 재고 자동 동기화
+        product.syncStatusByStock();
+
+        return new ProductStockUpdateResponse(product);
+    }
+
+    // 상품 상태 변경
+    @Transactional
+    public ProductStatusUpdateResponse updateStatus(Long productId,
+                                                    ProductStatusUpdateRequest request) {
+
+        Product product = productRepository
+                .findByIdAndDeletedAtIsNull(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        if (product.getStatus() == ProductStatus.DISCONTINUED) {
+            throw new CustomException(ErrorCode.PRODUCT_DISCONTINUED);
+        }
+
+        product.changeStatus(request.getStatus());
+
+        return new ProductStatusUpdateResponse(product);
     }
 }
