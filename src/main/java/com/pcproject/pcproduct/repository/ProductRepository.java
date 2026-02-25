@@ -14,7 +14,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>,
         JpaSpecificationExecutor<Product> {
     // 기본 단건 조회(soft delete 제외)
     Optional<Product> findByIdAndDeletedAtIsNull(Long id);
-    // 재고 변견용 비관적 락 조회
+    // 재고 변경용 비관적 락 조회
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Product> findWithLockByIdAndDeletedAtIsNull(Long id);
 
