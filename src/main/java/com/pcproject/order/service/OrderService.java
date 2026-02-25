@@ -180,7 +180,7 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public OrderDetailResponse getOrder(Long id) {
-        Order order = orderRepository.findById(id)
+        Order order = orderRepository.findWithDetailsById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
         return OrderDetailResponse.from(order);
     }
