@@ -49,22 +49,8 @@ public class OrderService {
             throw new CustomException(ErrorCode.ORDER_QUANTITY_INVALID);
         }
 
-        // 상품 삭제 여부 검증
-        if (product.getDeletedAt() != null) {
-            throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
-        }
-
-        // 판매 상태가 ON_SALE인지 확인
-        if (product.getStatus() != ProductStatus.ON_SALE) {
-            throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
-        }
-
-        //
-        if (product.getStock() < request.getQuantity()) {
-            throw new CustomException(ErrorCode.PRODUCT_STOCK_INSUFFICIENT);
-        }
-
-        // 재고가 있는지 검증 후 차감
+        // 재고가 상태 검증 후 차감
+        product.validateOrderable();
         product.decreaseStock(request.getQuantity());
 
         // 주문번호(임시) ORD-생성시간-랜덤
@@ -72,8 +58,8 @@ public class OrderService {
                 "ORD-" + System.currentTimeMillis()
                 + "-" + UUID.randomUUID().toString().substring(0, 4);
 
-        // 상품 가격(임시)
-        Long unitPrice = 10000L;
+        // 상품 가격 스냅샷
+        Long unitPrice = product.getPrice();
 
         // 관리자 Id 임시로 null값 넣음
         Order order = new Order(
