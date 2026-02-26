@@ -14,13 +14,6 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, Long>,
         JpaSpecificationExecutor<Product> {
 
-    // 주문 서비스 용
-    // 비관적 락(PESSIMISTIC_WRITE)을 적용한 상품 조회 메서드
-    // 재고 차감 시 동시성 제어 목적
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select p from Product p where p.id = :id")
-    Optional<Product> findByIdForUpdate(@Param("id") Long id);
-
     // 기본 단건 조회(soft delete 제외)
     Optional<Product> findByIdAndDeletedAtIsNull(Long id);
     // 재고 변경용 비관적 락 조회
