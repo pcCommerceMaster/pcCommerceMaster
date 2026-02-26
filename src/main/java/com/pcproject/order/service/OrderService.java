@@ -47,8 +47,6 @@ public class OrderService {
                 .orElseThrow(()-> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
 
         // 상품 조회 (비관적 락 적용: 재고 동시성 제어)
-//        Product product = productRepository.findByIdForUpdate(request.getProductId())
-//  ProductRepository 랑 통일
         Product product = productRepository.findWithLockByIdAndDeletedAtIsNull(request.getProductId())
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -62,13 +60,6 @@ public class OrderService {
                 "ORD-" + System.currentTimeMillis()
                 + "-" + UUID.randomUUID().toString().substring(0, 4);
 
-        // 상품 가격(임시)
-        //Long unitPrice = 10000L;
-//        Customer customer = customerRepository.findById(request.getCustomerId())
-//                .orElseThrow(() -> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
-//        Product product = productRepository.findById(request.getProductId())
-//                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-// 동일 코드로 인한 에러 수정
         // 상품 가격 스냅샷
         Long unitPrice = product.getPrice();
 
@@ -100,8 +91,7 @@ public class OrderService {
     @Transactional
     public UpdateOrderResponse updateOrderStatus(
             Long orderId,
-            UpdateOrderRequest request,
-            Admin admin) {
+            UpdateOrderRequest request) {
 
         // 주문 존재 여부 검증
         Order order = orderRepository.findById(orderId)
@@ -121,20 +111,11 @@ public class OrderService {
     @Transactional
     public CancelOrderResponse cancelOrder(
             Long orderId,
-            CancelOrderRequest request,
-            Admin admin) {
+            CancelOrderRequest request) {
 
         // 주문 존재 여부 검증
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
-                //.orElseThrow(() -> new IllegalStateException("ORDER_NOT_FOUND"));
-
-
-//        // 2) PREPARING만 취소 가능(추후 공통 에러 코드로 변경 예정)
-//        if (order.getStatus() != OrderStatus.PREPARING) {
-//            //throw new IllegalStateException("ORDER_CANCEL_NOT_ALLOWED");
-//            throw new CustomException(ErrorCode.ORDER_CANCEL_NOT_ALLOWED);
-//        }
 
         // 주문 취소 정책은 Order 도메인에서 처리
         order.cancel(request.getCancelReason());

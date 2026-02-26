@@ -50,8 +50,8 @@ public class OrderController {
             @PathVariable @Positive Long orderId,
             @Valid @RequestBody UpdateOrderRequest request,
             HttpServletRequest httpRequest) {
-        Admin admin = extractAdmin(httpRequest);
-        return ResponseEntity.ok(ApiResponse.success("주문 상태 변경 완료", orderService.updateOrderStatus(orderId, request, admin)));
+        extractAdmin(httpRequest);
+        return ResponseEntity.ok(ApiResponse.success("주문 상태 변경 완료", orderService.updateOrderStatus(orderId, request)));
     }
 
     // 주문 취소 API
@@ -61,8 +61,8 @@ public class OrderController {
             @PathVariable @Positive Long orderId,
             @Valid @RequestBody CancelOrderRequest request,
             HttpServletRequest httpRequest) {
-        Admin admin = extractAdmin(httpRequest);
-        return ResponseEntity.ok(ApiResponse.success("주문 취소 완료", orderService.cancelOrder(orderId, request, admin)));
+        extractAdmin(httpRequest);
+        return ResponseEntity.ok(ApiResponse.success("주문 취소 완료", orderService.cancelOrder(orderId, request)));
     }
 
     @GetMapping
