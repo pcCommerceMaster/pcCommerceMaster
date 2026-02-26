@@ -22,7 +22,7 @@ public class ProductController {
     private final ProductService productService;
 
 
-// 세션에서 직접 꺼내도록 수정
+// 상품 등록
     @PostMapping
     public ResponseEntity<ApiResponse<ProductCreateResponse>> createProduct(
             @Valid @RequestBody ProductCreateRequest request,
