@@ -60,8 +60,7 @@ cd backend
 
 ### 백엔드
 
-```
-src/main/java/com/pcproject /
+```src/main/java/com/pcproject /
 ├── 🛡️ admin 관리자/인증 /
 │   ├── controller      # AdminAuthController, AdminManagementController 등 /
 │   ├── dto             # LoginAdmin, AdminSignupRequest 등
@@ -91,7 +90,8 @@ src/main/java/com/pcproject /
 └── 🌐 global (공통 인프라)
     ├── exception       # CustomException, GlobalExceptionHandler
     ├── response        # ApiResponse (공통 응답 규격)
-    └── config          # WebConfig, JpaConfig (Auditing 설정 등)
+    └── config          # WebConfig, JpaConfig (Auditing 설정 등)```
+
 ## 프로젝트 기능 요약
 
 1. 👤 고객 관리 모듈 (Customer Management)
