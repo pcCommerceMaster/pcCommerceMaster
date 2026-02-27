@@ -61,18 +61,18 @@ cd backend
 ### 백엔드
 
 ```
-src/main/java/com/pcproject
-├── 🛡️ admin (관리자/인증)
-│   ├── controller      # AdminAuthController, AdminManagementController 등
+### src/main/java/com/pcproject
+###├── 🛡️ admin 관리자/인증
+###│   ├── controller      # AdminAuthController, AdminManagementController 등
 │   ├── dto             # LoginAdmin, AdminSignupRequest 등
 │   ├── entity          # Admin, AdminRole, AdminStatus
 │   ├── repository      # AdminRepository
 │   └── service         # AdminAuthService, AdminManagementService
 │
-├── 👤 customer (고객 관리 - 임호진 리더님 담당)
-│   ├── controller      # CustomerController (CRUD API)
+├── 👤 customer 고객 관리 - 임호진 리더님 담당
+│   ├── controller      # CustomerController CRUD API
 │   ├── dto             # GetCustomerListResponse, UpdateCustomerStatusRequest 등
-│   ├── entity          # Customer (Soft Delete 필드 포함)
+│   ├── entity          # Customer Soft Delete 필드 포함
 │   ├── repository      # CustomerRepository
 │   └── service         # CustomerService (비즈니스 로직 및 중복 체크)
 │
