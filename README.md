@@ -92,7 +92,6 @@ src/main/java/com/pcproject
     ├── exception       # CustomException, GlobalExceptionHandler
     ├── response        # ApiResponse (공통 응답 규격)
     └── config          # WebConfig, JpaConfig (Auditing 설정 등)
-
 ## 프로젝트 기능 요약
 
 1. 👤 고객 관리 모듈 (Customer Management)
