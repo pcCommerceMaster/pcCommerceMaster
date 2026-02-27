@@ -61,9 +61,9 @@ cd backend
 ### 백엔드
 
 ```
-### src/main/java/com/pcproject
-###├── 🛡️ admin 관리자/인증
-###│   ├── controller      # AdminAuthController, AdminManagementController 등
+src/main/java/com/pcproject /
+├── 🛡️ admin 관리자/인증 /
+│   ├── controller      # AdminAuthController, AdminManagementController 등 /
 │   ├── dto             # LoginAdmin, AdminSignupRequest 등
 │   ├── entity          # Admin, AdminRole, AdminStatus
 │   ├── repository      # AdminRepository
